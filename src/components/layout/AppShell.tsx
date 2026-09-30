@@ -34,7 +34,6 @@ export function AppShell({ userName, storageBytes, onSignOut, children }: AppShe
       <header className="workspace-topbar">
         <button className="icon-button mobile-menu-toggle" ref={toggle} type="button" aria-label={open ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={open} aria-controls="workspace-navigation" onClick={() => setOpen(!open)}>{open ? <X size={21} /> : <Menu size={21} />}</button>
         <span className="topbar-label">Un lugar para continuar tu trabajo.</span>
-        <span className="demo-badge"><FlaskConical size={14} aria-hidden="true" /> Demo</span>
         <div className="user-summary"><span className="user-avatar" aria-hidden="true">{userName.slice(0, 1)}</span><div><strong>{userName}</strong><span>Cuenta de demostración</span></div></div>
       </header>
     <div className="workspace-body">
