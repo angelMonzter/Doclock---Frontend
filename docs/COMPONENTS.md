@@ -12,7 +12,7 @@ Antes de cambiar un componente: localizar consumidores con rg, determinar su ám
 | Brand | inverse=false, className opcional | LoginPage y AppShell. Identidad desde config/brand, sin navegación propia. |
 | PageHeader | title, description, action opcional | DashboardPage, DocumentsPage y UploadPage. h1 y acción; enfoca título al montar/cambiarlo. |
 | EmptyState | title, description, action opcional | DocumentsPage: carpeta vacía y filtros sin coincidencias. Sin dominio. |
-| AppShell | userName, storageBytes opcional, onSignOut, children | ProtectedWorkspace. Sidebar, cabecera, menú móvil, bytes simulados y footer. Sin features/servicios. Menú en flujo; Escape cierra y restaura foco. |
+| AppShell | userName, storageBytes opcional, onSignOut, children | ProtectedWorkspace. Sidebar, cabecera, menú móvil, bytes simulados y footer. Sin features/servicios. Menú en flujo; Escape cierra y restaura foco. Ajuste de despliegue: retirados imports de iconos sin uso; sin cambios de contrato, estados o presentación. |
 
 Cambio compartido: Button y TextField usan ComponentProps nativas para declarar ref (React 19). Sin cambios a props previas o apariencia del login. workspace.css limita nuevos tamaños y layouts a .workspace o clases propias.
 

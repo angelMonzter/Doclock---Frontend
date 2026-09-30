@@ -22,6 +22,14 @@ npm run preview
 
 El ZIP no incluye node_modules ni dist. No se añadieron dependencias en esta etapa. Fuentes locales mediante Fontsource.
 
+## Despliegue en Netlify
+
+La raíz de este repositorio es la carpeta que contiene `package.json` y `netlify.toml`. Al conectar la rama de GitHub en Netlify, deja el directorio base en la raíz (vacío); no añadas `frontend` para esta estructura. La configuración versionada ejecuta `npm run build`, publica `dist` y usa Node.js 22.19.0. `.nvmrc` indica la misma versión para desarrollo local.
+
+Antes de subir cambios, ejecuta `npm ci`, `npm run typecheck`, `npm test` y `npm run build`. Puedes revisar el resultado con `npm run preview`; para desarrollar sigue usando `npm run dev`.
+
+Vite copia `public/_redirects` a `dist/_redirects` para que las rutas de React funcionen también al abrirlas directamente o recargarlas en Netlify. No se requieren variables de entorno para la demo actual. El despliegue conserva los servicios simulados y no añade persistencia ni almacenamiento remoto.
+
 ## Recorrido de prueba
 
 1. Usa demo@archivo.app / Archivo2026! o «Usar datos de prueba». Inicia sesión.

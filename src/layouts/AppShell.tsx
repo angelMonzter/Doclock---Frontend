@@ -8,7 +8,7 @@ import {
   Menu,
   X,
   HardDrive,
-  Tags, Users, ShieldCheck, History, Palette, Settings2, FileCheck, MessageSquare,
+  Tags, Users, ShieldCheck, History, Palette, Settings2,
 } from 'lucide-react';
 import { Brand } from '@/components/brand/Brand';
 import { formatBytes } from '@/lib/format';
@@ -93,8 +93,6 @@ export function AppShell({
           <NavLink to="/historial"><History size={19} />Historial</NavLink>
           <NavLink to="/apariencia"><Palette size={19} />Apariencia</NavLink>
           <NavLink to="/configuracion-archivos"><Settings2 size={19} />Configuración de archivos</NavLink>
-          {/*<NavLink to="/tipos-archivo"><FileCheck size={19} />Tipos de archivo</NavLink> */}
-          {/*<NavLink to="/mensajes"><MessageSquare size={19} />Mensajes del sistema</NavLink>*/}
         </nav>
 
         <div className="sidebar-bottom">
@@ -160,4 +158,3 @@ export function AppShell({
     </div>
   );
 }
-
