@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-29T17:00:17.2389952Z",
+  "title": "Design System: Archivo",
+  "extensions": {
+    "shadows": [],
+    "motion": [
+      {
+        "name": "control-color",
+        "value": "150ms ease",
+        "purpose": "Fondo de botones y borde de campos. Desactivado con prefers-reduced-motion."
+      },
+      {
+        "name": "loading",
+        "value": "1s linear infinite",
+        "purpose": "Indicador de envío. Desactivado con prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "value": "760px",
+        "name": "mobile-max"
+      },
+      {
+        "value": "960px",
+        "name": "detail-full-width-max"
+      },
+      {
+        "value": "1200px",
+        "name": "workspace-compact-max"
+      },
+      {
+        "value": "380px",
+        "name": "workspace-single-card-max"
+      },
+      {
+        "value": "1050px",
+        "name": "login-compact-max"
+      },
+      {
+        "value": "1600px",
+        "name": "login-wide-min"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button primary",
+      "kind": "button",
+      "description": "Acción principal compartida. Contratos y consumidores en docs/COMPONENTS.md.",
+      "html": "<button type=\"button\" class=\"ds-button\">Iniciar sesión</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;font:600 13px var(--font-sans,sans-serif);border:1px solid transparent;border-radius:var(--radius,10px);min-height:49px;padding:12px 20px;background:var(--primary,#194e3e);color:#fff;transition:background-color 150ms;cursor:pointer}.ds-button:hover:not(:disabled){background:#103b2e}.ds-button:focus-visible{outline:3px solid var(--ring,#347c60);outline-offset:4px}.ds-button:disabled{cursor:wait;opacity:.65}@media(prefers-reduced-motion:reduce){.ds-button{transition:none}}"
+    },
+    {
+      "name": "TextField",
+      "kind": "input",
+      "description": "Etiqueta asociada y foco en el contenedor. El error tiene prioridad sobre la ayuda.",
+      "html": "<label class=\"ds-label\" for=\"ds-email\">Correo electrónico</label><div class=\"ds-field\"><input id=\"ds-email\" class=\"ds-input\" type=\"email\" autocomplete=\"email\" placeholder=\"nombre@ejemplo.com\" /></div>",
+      "css": ".ds-label{display:block;font:600 13px var(--font-sans,sans-serif);margin-bottom:9px;color:var(--foreground,#202d28)}.ds-field{display:flex;min-height:49px;background:#fff;border:1px solid var(--border,#d4dcd6);border-radius:var(--radius,10px);transition:border-color 150ms}.ds-field:focus-within{border-color:var(--primary,#194e3e);outline:2px solid #b8d4b9;outline-offset:2px}.ds-input{width:100%;min-width:0;padding:14px 12px;border:0;background:transparent;outline:none;border-radius:var(--radius,10px);font:13px var(--font-sans,sans-serif);color:var(--foreground,#202d28)}.ds-input::placeholder{color:#68756b;opacity:1}@media(max-width:760px){.ds-input{font-size:16px}}@media(prefers-reduced-motion:reduce){.ds-field{transition:none}}"
+    },
+    {
+      "name": "Notice success",
+      "kind": "custom",
+      "description": "Confirmación accesible; los avisos de error usan role=alert.",
+      "html": "<div class=\"ds-notice\" role=\"status\">Acceso de demostración correcto.</div>",
+      "css": ".ds-notice{padding:13px;font:12px/1.6 var(--font-sans,sans-serif);border-radius:8px;background:#e7f2e4;color:#27502c;margin-bottom:18px}"
+    },
+    {
+      "name": "Button secondary",
+      "kind": "button",
+      "description": "Acción principal compartida. Contratos y consumidores en docs/COMPONENTS.md.",
+      "html": "<button type=\"button\" class=\"ds-button\">Usar datos de prueba</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;font:600 13px var(--font-sans,sans-serif);border:1px solid transparent;border-radius:var(--radius,10px);min-height:49px;padding:12px 20px;background:transparent;color:var(--primary,#194e3e);border-color:#c4d2bd;transition:background-color 150ms;cursor:pointer}.ds-button:hover:not(:disabled){background:#e5eddf}.ds-button:focus-visible{outline:3px solid var(--ring,#347c60);outline-offset:4px}.ds-button:disabled{cursor:wait;opacity:.65}@media(prefers-reduced-motion:reduce){.ds-button{transition:none}}"
+    },
+    {
+      "name": "Button ghost",
+      "kind": "button",
+      "description": "Acción principal compartida. Contratos y consumidores en docs/COMPONENTS.md.",
+      "html": "<button type=\"button\" class=\"ds-button\">Acción secundaria</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;font:600 13px var(--font-sans,sans-serif);border:1px solid transparent;border-radius:var(--radius,10px);min-height:49px;padding:12px 20px;background:transparent;color:var(--primary,#194e3e);transition:background-color 150ms;cursor:pointer}.ds-button:hover:not(:disabled){background:#edf2e9}.ds-button:focus-visible{outline:3px solid var(--ring,#347c60);outline-offset:4px}.ds-button:disabled{cursor:wait;opacity:.65}@media(prefers-reduced-motion:reduce){.ds-button{transition:none}}"
+    }
+  ],
+  "narrative": {
+    "overview": "Archivo: login y espacio documental simulado. Inicio, carpetas, documentos y subida heredan verde bosque, superficies claras y tipografías locales. Contratos en docs/COMPONENTS.md.",
+    "keyCharacteristics": [
+      "Login conserva composición 47/53",
+      "AppShell con sidebar y menú móvil a 760px",
+      "Detalle lateral sobre 960px; vista completa debajo",
+      "Datos documentales únicos y resumen calculado",
+      "Sin contenido de archivos ni backend"
+    ],
+    "rules": [
+      {
+        "name": "Estado perceptible",
+        "body": "Ningún estado depende únicamente del color.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Revisar consumidores antes de modificar componentes o tokens.",
+      "Mantener foco visible, errores textuales y movimiento reducido."
+    ],
+    "donts": [
+      "Convertir estilos propios del login en API visual compartida.",
+      "Presentar la ilustración documental como acción funcional.",
+      "Prometer una sesión segura con el servicio dummy."
+    ]
+  }
+}
