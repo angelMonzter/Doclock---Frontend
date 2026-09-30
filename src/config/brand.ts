@@ -1,1 +1,4 @@
-export const brand = { name: 'Archivo', descriptor: 'Gestión documental' } as const;
+export const brand = {
+  name: 'Archivo',
+  descriptor: 'Gestión documental',
+} as const;

@@ -19,3 +19,9 @@ Los estilos nuevos quedan en workspace.css y no redefinen login-*. Controles int
 Tokens: --surface #ffffff, --surface-subtle #f1f4ed, --surface-selected #e4eddf, --warning #805614, --warning-surface #fff4de, --success #27502c, --success-surface #e7f2e4. Tonos de iconos con extensión textual: PDF #98402d/#f9eee9, texto #3e5d72/#eaf0f5, imagen #765180/#f3eef5. No representar garantías de cifrado/seguridad.
 
 Responsive interno: 1200px (densidad), 960px (detalle completo), 760px (menú móvil), 380px (cuadrícula de una columna). Capacidad de 1GB provisional y simulada.
+
+## Extensión administrativa
+
+Los ocho módulos reutilizan tipografía, tokens, superficies y controles existentes. Las tablas se alojan en regiones con desplazamiento horizontal y acceso por teclado; los formularios se editan dentro de la página, en dos columnas y una sola hasta 760px. Estados, errores y confirmaciones conservan etiquetas textuales y foco visible.
+
+Los estilos de administración se aíslan en administration.css mediante clases admin-*. El sidebar admite desplazamiento vertical para alcanzar la navegación ampliada. Esta extensión conserva el estilo de login, Inicio, Documentos y Subir; las vistas previas de apariencia y mensajes se limitan a su módulo.

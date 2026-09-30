@@ -32,3 +32,16 @@
 - Selección por diálogo comprobada; arrastrar/soltar implementado, sin prueba manual de arrastre desde el escritorio.
 - No backend ni contenido de archivos. La sesión y rutas son simulaciones, no mecanismos de autorización real.
 - Durante las ediciones Vite registró un fallo transitorio de hot reload; la carga posterior de las rutas y la compilación final funcionan.
+
+## Extensión de administración · 30 de septiembre de 2026
+
+- Ocho rutas nuevas protegidas y enlazadas; las páginas previas solo se movieron al nivel principal de pages.
+- Compilación TypeScript/Vite correcta. Avisos no bloqueantes de Zod y bundle principal de aproximadamente 517 kB sin comprimir.
+- Pruebas de administración: duplicados normalizados, historial antes/después, snapshots independientes, reset, referencias de roles, bloqueo de desactivación con usuarios activos, reactivación con rol inactivo, enteros/rangos, capacidad, singleton, MIME y colores.
+- Navegador: las ocho rutas se abren. Alta/edición de categoría, confirmación y movimiento en historial verificados; detalle muestra antes/después.
+- Teclado: foco inicial del editor, retorno al botón Editar después de guardar y Escape/retorno a Crear verificados. Menú móvil abre y navega a Usuarios.
+- Escritorio 1440×1000: tabla de categorías y navegación. Móvil 390×844: estado vacío de mensajes, formulario y tabla de usuarios con desplazamiento interno; ancho de documento 375px, sin desbordamiento global.
+- Capturas: admin-desktop.jpg, admin-mobile.jpg, admin-form-mobile.jpg y admin-history.jpg.
+- Carga, reintento de consulta y disabled están implementados; no se simuló fallo de transporte en navegador (el adaptador es local). No se certifica accesibilidad con lector de pantalla.
+- Los cambios de administración no se aplican a la política documental ni al shell existente; se explicita en las vistas y MODULES_GAPS.md.
+- Resultado final de esta extensión: 15 pruebas correctas en 3 archivos; build completado. Revisión visual externa: ship visual para capturas corregidas de escritorio y móvil; no equivale a auditoría de accesibilidad completa.

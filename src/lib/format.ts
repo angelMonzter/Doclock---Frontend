@@ -5,5 +5,9 @@ export function formatBytes(bytes: number) {
   return `${new Intl.NumberFormat('es-MX', { maximumFractionDigits: 1 }).format(bytes / divisor)} ${unit}`;
 }
 export function formatDate(value: string) {
-  return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(value));
+  return new Intl.DateTimeFormat('es-MX', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(value));
 }

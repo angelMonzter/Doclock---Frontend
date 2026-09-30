@@ -57,19 +57,25 @@ src/
   app/                   # Providers, rutas protegidas y composición
   components/
     brand/               # Identidad centralizada
-    layout/              # AppShell presentacional
+    auth/                # Formulario de acceso
+    documents/           # Listado, detalle, carpeta, dropzone y cola
     ui/                  # Primitivas sin dominio
   config/                # Marca y política de archivos
-  features/
-    auth/                # Login, sesión demo, AuthService
-    dashboard/pages/     # Resumen del repositorio compartido
-    documents/
-      components/        # Listado, detalle, carpeta, dropzone, cola
-      hooks/             # Consulta compartida y ciclo de carga
-      pages/             # Explorador y subida
-      services/          # DocumentService dummy, seed y pruebas
-      types.ts           # Contratos del dominio
-      model.ts           # Filtros, métricas, jerarquía, validación
+  layouts/               # AppShell presentacional
+  pages/
+    auth/                # Login
+    dashboard/           # Resumen del repositorio compartido
+    documents/           # Explorador y subida
+  services/
+    auth/                # AuthService dummy y pruebas
+    documents/           # DocumentService dummy, seed y pruebas
+  hooks/
+    auth/                # Inicio de sesión
+    documents/           # Consulta compartida y ciclo de carga
+  providers/             # Contexto de sesión: AuthProvider
+  schemas/auth/          # Validación del formulario de acceso
+  types/                 # Contratos de autenticación y documentos
+  models/                # Filtros, métricas, jerarquía y validación documental
   lib/                   # Formatos y utilidades
   styles/                # globals.css (login/primitivas), workspace.css
 ~~~
