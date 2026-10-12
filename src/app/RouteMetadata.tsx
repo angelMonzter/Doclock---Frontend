@@ -11,11 +11,15 @@ export function RouteMetadata() {
       '/documentos': 'Documentos',
       '/subir': 'Subir archivos',
       '/historial': 'Historial',
-      ...Object.fromEntries(Object.values(adminModules).map(module => [module.path, module.title])),
+      ...Object.fromEntries(
+        Object.values(adminModules).map((module) => [
+          module.path,
+          module.title,
+        ]),
+      ),
     };
     document.title = `${names[pathname] ?? 'Inicio'} · ${brand.name}`;
     window.scrollTo(0, 0);
   }, [pathname]);
   return null;
 }
-

@@ -1,3 +1,7 @@
+import { Pagination } from '@/components/ui/Pagination';
+import { useLocalPagination } from '@/hooks/useLocalPagination';
+import { useDocumentList } from '@/hooks/documents/useDocumentList';
+import { SelectField } from '@/components/ui/SelectField';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import {
@@ -15,16 +19,31 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Notice } from '@/components/ui/Notice';
 import { useDocuments } from '@/hooks/documents/useDocuments';
-import { filterDocuments, folderTrail } from '@/models/documents';
+import { folderTrail } from '@/models/documents';
 import { RepositoryState } from '@/components/documents/RepositoryState';
 import { DocumentCollection } from '@/components/documents/DocumentCollection';
 import { DocumentDetails } from '@/components/documents/DocumentDetails';
 import { CreateFolderForm } from '@/components/documents/CreateFolderForm';
-import { filePolicy } from '@/config/files';
+import { useAuth } from '@/providers/AuthProvider';
+import { FolderActions } from '@/components/documents/FolderActions';
+import { RepositoryTrash } from '@/components/documents/RepositoryTrash';
 
 export function DocumentsPage() {
   const query = useDocuments();
+  const { user } = useAuth();
   const [params, setParams] = useSearchParams();
+  const listing = useDocumentList(params);
+  const search = params.get('q') ?? '';
+  const localFolders = useLocalPagination(
+    (query.data?.folders ?? []).filter(
+      (item) =>
+        item.parentId === params.get('carpeta') &&
+        item.name
+          .toLocaleLowerCase('es')
+          .includes(search.trim().toLocaleLowerCase('es')),
+    ),
+    (params.get('carpeta') ?? '') + ':' + search,
+  );
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState('');
   const trigger = useRef<HTMLElement | null>(null);
@@ -40,6 +59,8 @@ export function DocumentsPage() {
       (previous) => {
         const next = new URLSearchParams(previous);
         value ? next.set(key, value) : next.delete(key);
+        if (!['pagina', 'documento', 'vista'].includes(key))
+          next.delete('pagina');
         return next;
       },
       { replace: true },
@@ -61,7 +82,7 @@ export function DocumentsPage() {
     setCreating(false);
     requestAnimationFrame(() => newFolderButton.current?.focus());
   }
-  if (!query.data)
+  if (!query.data || query.isError)
     return (
       <RepositoryState
         error={query.error}
@@ -74,28 +95,16 @@ export function DocumentsPage() {
   const folder = data.folders.find((item) => item.id === folderId);
   const invalidFolder = !!folderId && !folder;
   const trail = folderTrail(data.folders, folderId);
-  const search = params.get('q') ?? '';
   const category = params.get('categoria') ?? '';
   const type = params.get('tipo') ?? '';
   const sort = params.get('orden') ?? 'recent';
   const view = params.get('vista') === 'grid' ? 'grid' : 'list';
-  const documents = invalidFolder
-    ? []
-    : filterDocuments(data.documents, {
-        folder: folderId,
-        query: search,
-        category,
-        type,
-        sort,
-      });
-  const folders = data.folders.filter(
-    (item) =>
-      item.parentId === folderId &&
-      item.name
-        .toLocaleLowerCase('es')
-        .includes(search.trim().toLocaleLowerCase('es')),
-  );
-  const selected = data.documents.find((item) => item.id === selectedId);
+  const documents =
+    invalidFolder || listing.query.isPlaceholderData
+      ? []
+      : (listing.query.data?.items ?? []);
+  const folders = localFolders.items;
+  const selected = listing.selected.isError ? undefined : listing.selected.data;
   return (
     <>
       <PageHeader
@@ -124,20 +133,23 @@ export function DocumentsPage() {
       </nav>
       {invalidFolder && (
         <Notice tone="error">
-          Esta carpeta no existe o se reinició al recargar.{' '}
+          Esta carpeta ya no está disponible.{' '}
           <Link to="/documentos">Volver al repositorio.</Link>
         </Notice>
       )}
-      {selectedId && !selected && (
+      {selectedId && listing.selected.isError && (
         <Notice>
-          El documento ya no está disponible. Los registros de prueba se
-          reinician al recargar.{' '}
+          El documento ya no está disponible.{' '}
           <button type="button" className="text-link" onClick={closeDetails}>
             Cerrar aviso
           </button>
         </Notice>
       )}
       {message && <Notice tone="success">{message}</Notice>}
+      <RepositoryTrash />
+      {folder && (
+        <FolderActions key={folder.id} folder={folder} folders={data.folders} />
+      )}
       <div className={`explorer-layout ${selected ? 'with-details' : ''}`}>
         <div className="explorer-main">
           <section
@@ -153,44 +165,43 @@ export function DocumentsPage() {
               leadingIcon={<Search size={18} />}
             />
             <div className="filter-row">
-              <label>
-                Categoría
-                <select
-                  value={category}
-                  onChange={(event) => change('categoria', event.target.value)}
-                >
-                  <option value="">Todas las categorías</option>
-                  {data.categories.map((item) => (
-                    <option value={item.id} key={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Formato
-                <select
-                  value={type}
-                  onChange={(event) => change('tipo', event.target.value)}
-                >
-                  <option value="">Todos los formatos</option>
-                  {filePolicy.extensions.map((ext) => (
-                    <option value={ext} key={ext}>
-                      {ext.toUpperCase()}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Orden
-                <select
-                  value={sort}
-                  onChange={(event) => change('orden', event.target.value)}
-                >
-                  <option value="recent">Más recientes</option>
-                  <option value="name">Nombre A–Z</option>
-                </select>
-              </label>
+              <SelectField
+                label="Categoría"
+                value={category}
+                onChange={(event) => change('categoria', event.target.value)}
+              >
+                <option value="">Todas las categorías</option>
+                {data.categories.map((item) => (
+                  <option value={item.id} key={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </SelectField>
+              <SelectField
+                label="Formato"
+                value={type}
+                onChange={(event) => change('tipo', event.target.value)}
+              >
+                <option value="">Todos los formatos</option>
+                {[
+                  ...new Set([
+                    ...data.policy.extensions,
+                    ...(data.summary?.extensions ?? []),
+                  ]),
+                ].map((ext) => (
+                  <option value={ext} key={ext}>
+                    {ext.toUpperCase()}
+                  </option>
+                ))}
+              </SelectField>
+              <SelectField
+                label="Orden"
+                value={sort}
+                onChange={(event) => change('orden', event.target.value)}
+              >
+                <option value="recent">Más recientes</option>
+                <option value="name">Nombre A–Z</option>
+              </SelectField>
               <div
                 className="view-switch"
                 role="group"
@@ -226,6 +237,9 @@ export function DocumentsPage() {
                 <Button
                   variant="secondary"
                   ref={newFolderButton}
+                  disabled={
+                    !user?.permissions.puede_gestionar_carpetas || query.isError
+                  }
                   onClick={() => {
                     setCreating(!creating);
                     setMessage('');
@@ -245,6 +259,10 @@ export function DocumentsPage() {
                   }}
                 />
               )}
+              <Pagination
+                label="Paginación de carpetas"
+                {...localFolders.pagination}
+              />
               <div className="folder-grid">
                 {folders.map((item) => (
                   <Link
@@ -256,10 +274,10 @@ export function DocumentsPage() {
                     <strong>{item.name}</strong>
                     <span>
                       Archivos directos:{' '}
-                      {
-                        data.documents.filter((doc) => doc.folderId === item.id)
-                          .length
-                      }
+                      {Number(
+                        data.summary?.folders.find((row) => row.id === item.id)
+                          ?.total ?? 0,
+                      )}
                     </span>
                     <ChevronRight className="folder-chevron" size={16} />
                   </Link>
@@ -280,11 +298,31 @@ export function DocumentsPage() {
                 {folder ? `Archivos en ${folder.name}` : 'Todos los archivos'}
               </h2>
               <span className="count-label" aria-live="polite">
-                {documents.length}{' '}
-                {documents.length === 1 ? 'resultado' : 'resultados'}
+                {listing.query.data?.total ?? 0}{' '}
+                {listing.query.data?.total === 1 ? 'resultado' : 'resultados'}
               </span>
             </div>
-            {documents.length ? (
+            <Pagination
+              label="Paginación de documentos"
+              page={listing.page}
+              pageSize={listing.pageSize}
+              total={listing.query.data?.total ?? 0}
+              busy={listing.query.isFetching}
+              onPageChange={(page) => change('pagina', String(page))}
+              onPageSizeChange={(size) => change('cantidad', String(size))}
+            />
+            {!user?.permissions.puede_ver_archivos ? (
+              <Notice>No tienes permiso para consultar los documentos.</Notice>
+            ) : listing.query.isError ? (
+              <Notice tone="error">
+                {listing.query.error.message}
+                <Button onClick={() => listing.query.refetch()}>
+                  Reintentar
+                </Button>
+              </Notice>
+            ) : listing.query.isPending || listing.query.isPlaceholderData ? (
+              <p role="status">Cargando documentos…</p>
+            ) : documents.length ? (
               <DocumentCollection
                 documents={documents}
                 categories={data.categories}

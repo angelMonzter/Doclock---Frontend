@@ -1,4 +1,5 @@
 import { filePolicy } from '@/config/files';
+import type { FilePolicy } from '@/types/repository';
 import { formatBytes } from '@/lib/format';
 import type {
   DocumentFile,
@@ -12,16 +13,13 @@ export function extensionOf(name: string) {
 }
 export function validateFile(
   file: Pick<UploadItem, 'name' | 'size'>,
+  policy: FilePolicy = filePolicy,
 ): string | null {
-  if (
-    !(filePolicy.extensions as readonly string[]).includes(
-      extensionOf(file.name),
-    )
-  )
+  if (!policy.extensions.includes(extensionOf(file.name)))
     return 'Formato no permitido.';
   if (file.size <= 0) return 'El archivo está vacío.';
-  if (file.size > filePolicy.maxBytes)
-    return `Supera el límite de ${formatBytes(filePolicy.maxBytes)}.`;
+  if (file.size > policy.maxBytes)
+    return `Supera el límite de ${formatBytes(policy.maxBytes)}.`;
   return null;
 }
 export function getSummary(data: DocumentSnapshot) {

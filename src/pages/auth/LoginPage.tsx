@@ -3,6 +3,7 @@ import { Brand } from '@/components/brand/Brand';
 import { LoginForm } from '@/components/auth/LoginForm';
 
 export function LoginPage() {
+  //code mode usuarios: textos de acceso real; se conserva la composición visual.
   return (
     <main className="login-page">
       <section className="login-story" aria-label="Tu espacio documental">
@@ -57,7 +58,7 @@ export function LoginPage() {
           <Brand />
         </div>
         <span className="environment-label">
-          <span /> Entorno de demostración
+          <span /> Acceso a tu organización
         </span>
         <div className="login-content">
           <header className="login-heading">
@@ -71,7 +72,7 @@ export function LoginPage() {
           </p>
         </div>
         <footer className="login-footer">
-          Prototipo de interfaz · Sin conexión a la base de datos
+          Archivo · Sistema de gestión documental
         </footer>
       </section>
     </main>

@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/TextField';
 import { Notice } from '@/components/ui/Notice';
 import { loginSchema, type LoginValues } from '@/schemas/auth/loginSchema';
-import { demoCredentials } from '@/services/auth/mockAuthService';
+//code mode usuarios: acceso real, sin credenciales ni autocompletado de prueba.
 import { useLogin } from '@/hooks/auth/useLogin';
 
 export function LoginForm() {
@@ -23,18 +23,12 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
-    reset,
-    setFocus,
     formState: { errors },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
-  function fillDemo() {
-    login.reset();
-    reset(demoCredentials);
-    setFocus('email');
-  }
+
   return (
     <>
       <form
@@ -93,8 +87,8 @@ export function LoginForm() {
         </div>
         {help && (
           <Notice>
-            La recuperación estará disponible al conectar el sistema. Por ahora,
-            utiliza los datos de prueba de abajo.
+            Solicita al administrador de tu organización que restablezca tu
+            contraseña.
           </Notice>
         )}
         {login.isError && <Notice tone="error">{login.error.message}</Notice>}
@@ -111,31 +105,6 @@ export function LoginForm() {
           )}
         </Button>
       </form>
-      <div className="demo-panel">
-        <div className="demo-title">
-          <span className="demo-dot" /> Explora la versión de prueba
-        </div>
-        <p>Prueba el acceso con una cuenta de demostración.</p>
-        <dl>
-          <div>
-            <dt>Correo</dt>
-            <dd>{demoCredentials.email}</dd>
-          </div>
-          <div>
-            <dt>Contraseña</dt>
-            <dd>{demoCredentials.password}</dd>
-          </div>
-        </dl>
-        <Button
-          variant="secondary"
-          size="small"
-          className="w-full"
-          disabled={login.isPending}
-          onClick={fillDemo}
-        >
-          Usar datos de prueba <ArrowRight size={16} aria-hidden="true" />
-        </Button>
-      </div>
     </>
   );
 }

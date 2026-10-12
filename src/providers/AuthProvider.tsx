@@ -1,48 +1,105 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
-import type { DemoUser } from '@/types/auth';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import type { AuthSession, AuthUser } from '@/types/auth';
+import { authService } from '@/services/auth/authService';
+import {
+  getToken,
+  sessionExpiredEvent,
+  setToken,
+} from '@/services/auth/session';
 
-const key = 'archivo.demo.session.v1';
-function readSession(): DemoUser | null {
-  try {
-    const value = JSON.parse(sessionStorage.getItem(key) ?? 'null');
-    return value?.id === 'demo-user' &&
-      typeof value.name === 'string' &&
-      typeof value.email === 'string'
-      ? value
-      : null;
-  } catch {
-    return null;
-  }
-}
+//code mode usuarios: restaura la sesión con /me y limpia datos al salir o vencer el token.
 const AuthContext = createContext<{
-  user: DemoUser | null;
-  signIn: (user: DemoUser) => void;
+  user: AuthUser | null;
+  loading: boolean;
+  error: string | null;
+  retrySession: () => void;
+  signIn: (session: AuthSession) => void;
   signOut: () => void;
+  updateProfile: (id: string, name: string, email: string) => void;
 } | null>(null);
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState(readSession);
-  function signIn(next: DemoUser) {
-    setUser(next);
-    try {
-      sessionStorage.setItem(key, JSON.stringify(next));
-    } catch {
-      /* Sesión en memoria si el navegador bloquea almacenamiento. */
-    }
-  }
-  function signOut() {
+  const client = useQueryClient();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(() => Boolean(getToken()));
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+
+  const signOut = useCallback(() => {
+    setToken(null);
     setUser(null);
-    try {
-      sessionStorage.removeItem(key);
-    } catch {
-      /* Sin almacenamiento persistente. */
-    }
+    setLoading(false);
+    setError(null);
+    void client.cancelQueries();
+    client.clear();
+  }, [client]);
+
+  useEffect(() => {
+    window.addEventListener(sessionExpiredEvent, signOut);
+    return () => window.removeEventListener(sessionExpiredEvent, signOut);
+  }, [signOut]);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) return;
+    const controller = new AbortController();
+    setLoading(true);
+    setError(null);
+    authService
+      .me(controller.signal)
+      .then((next) => {
+        if (!controller.signal.aborted && getToken() === token) setUser(next);
+      })
+      .catch((reason: Error) => {
+        if (!controller.signal.aborted && getToken() === token)
+          setError(reason.message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [attempt]);
+
+  function signIn(session: AuthSession) {
+    void client.cancelQueries();
+    client.clear();
+    setToken(session.token);
+    setUser(session.user);
+    setLoading(false);
+    setError(null);
   }
+
+  function updateProfile(id: string, name: string, email: string) {
+    setUser((current) =>
+      current?.id === id ? { ...current, name, email } : current,
+    );
+  }
+
   return (
-    <AuthContext.Provider value={{ user, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        error,
+        signIn,
+        signOut,
+        updateProfile,
+        retrySession: () => setAttempt((current) => current + 1),
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
+
 export function useAuth() {
   const value = useContext(AuthContext);
   if (!value) throw new Error('useAuth requiere AuthProvider');

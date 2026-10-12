@@ -46,7 +46,10 @@ export function App() {
               <Route path="/roles" element={<RolesPage />} />
               <Route path="/historial" element={<HistoryPage />} />
               <Route path="/apariencia" element={<AppearancePage />} />
-              <Route path="/configuracion-archivos" element={<FileSettingsPage />} />
+              <Route
+                path="/configuracion-archivos"
+                element={<FileSettingsPage />}
+              />
               <Route path="/tipos-archivo" element={<FileTypesPage />} />
               <Route path="/mensajes" element={<MessagesPage />} />
             </Route>
@@ -57,4 +60,3 @@ export function App() {
     </QueryClientProvider>
   );
 }
-

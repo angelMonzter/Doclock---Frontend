@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/TextField';
 import { Notice } from '@/components/ui/Notice';
-import { documentService } from '@/services/documents/mockDocumentService';
+import { repositoryService } from '@/services/documents/repositoryService';
 import { useRefreshDocuments } from '@/hooks/documents/useDocuments';
 
 export function CreateFolderForm({
@@ -19,7 +19,7 @@ export function CreateFolderForm({
   const input = useRef<HTMLInputElement>(null);
   const refresh = useRefreshDocuments();
   const mutation = useMutation({
-    mutationFn: () => documentService.createFolder(name, parentId),
+    mutationFn: () => repositoryService.createFolder(name, parentId),
     onSuccess: async (folder) => {
       await refresh();
       onCreated(folder.name);
@@ -59,7 +59,7 @@ export function CreateFolderForm({
         </Button>
       </div>
       <Notice>
-        La carpeta estará disponible hasta que recargues o cierres sesión.
+        La carpeta se guardará en el sistema y estará disponible al volver.
       </Notice>
     </form>
   );

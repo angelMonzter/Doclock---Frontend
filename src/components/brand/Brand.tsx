@@ -1,5 +1,4 @@
-import { LibraryBig } from 'lucide-react';
-import { brand } from '@/config/brand';
+import logoSistema from '@/logo_sistema.png';
 import { cn } from '@/lib/utils';
 
 export function Brand({
@@ -11,13 +10,13 @@ export function Brand({
 }) {
   return (
     <div className={cn('brand', inverse && 'brand-inverse', className)}>
-      <span className="brand-mark">
-        <LibraryBig size={24} strokeWidth={1.7} aria-hidden="true" />
-      </span>
-      <div>
-        <span className="brand-name">{brand.name}</span>
-        <span className="brand-description">{brand.descriptor}</span>
-      </div>
+      <img
+        className="brand-logo"
+        src={logoSistema}
+        alt="Logo del sistema"
+        width={2396}
+        height={1248}
+      />
     </div>
   );
 }

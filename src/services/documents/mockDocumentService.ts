@@ -1,13 +1,18 @@
 import { filePolicy } from '@/config/files';
 import { extensionOf, validateFile } from '@/models/documents';
-import type { DocumentService } from '@/types/documents';
+import type { DocumentService, DocumentSnapshot } from '@/types/documents';
+import type { FilePolicy } from '@/types/repository';
 import { createSeed } from '@/services/documents/seed';
 
 function pause(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-export function createMockDocumentService(): DocumentService {
-  let data = createSeed();
+export function createMockDocumentService(
+  initialData?: DocumentSnapshot,
+  policy: FilePolicy = filePolicy,
+  storageBytes?: number,
+): DocumentService {
+  let data = structuredClone(initialData ?? createSeed());
   return {
     async getSnapshot() {
       await pause(180);
@@ -41,10 +46,8 @@ export function createMockDocumentService(): DocumentService {
       return structuredClone(folder);
     },
     async upload(request, options = {}) {
-      if (!request.files.length || request.files.length > filePolicy.maxFiles)
-        throw new Error(
-          `Selecciona entre 1 y ${filePolicy.maxFiles} archivos.`,
-        );
+      if (!request.files.length || request.files.length > policy.maxFiles)
+        throw new Error(`Selecciona entre 1 y ${policy.maxFiles} archivos.`);
       if (
         request.folderId &&
         !data.folders.some((folder) => folder.id === request.folderId)
@@ -57,7 +60,7 @@ export function createMockDocumentService(): DocumentService {
       if (request.description.length > 500)
         throw new Error('La descripción no puede superar 500 caracteres.');
       for (const file of request.files) {
-        const error = validateFile(file);
+        const error = validateFile(file, policy);
         if (error) throw new Error(`${file.name}: ${error}`);
         if (!file.title.trim() || file.title.trim().length > 150)
           throw new Error(
@@ -77,12 +80,11 @@ export function createMockDocumentService(): DocumentService {
         options.onProgress?.(progress);
       }
       const bytes =
-        data.documents.reduce((sum, doc) => sum + doc.bytes, 0) +
+        (storageBytes ??
+          data.documents.reduce((sum, doc) => sum + doc.bytes, 0)) +
         request.files.reduce((sum, file) => sum + file.size, 0);
-      if (bytes > filePolicy.capacityBytes)
-        throw new Error(
-          'No hay capacidad suficiente en el repositorio simulado.',
-        );
+      if (policy.capacityBytes !== null && bytes > policy.capacityBytes)
+        throw new Error('No hay capacidad suficiente en el repositorio.');
       const createdAt = new Date().toISOString();
       const documents = request.files.map((file) => ({
         id: crypto.randomUUID(),

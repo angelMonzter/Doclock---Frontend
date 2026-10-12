@@ -5,7 +5,30 @@ import { useAuth } from '@/providers/AuthProvider';
 import { AppShell } from '@/layouts/AppShell';
 import { useDocuments } from '@/hooks/documents/useDocuments';
 import { documentService } from '@/services/documents/mockDocumentService';
-import { getSummary } from '@/models/documents';
+import { Notice } from '@/components/ui/Notice';
+import { Button } from '@/components/ui/button';
+
+//code mode usuarios: espera /me antes de redirigir y permite reintentar fallos de red.
+function SessionStatus() {
+  const { loading, error, retrySession, signOut } = useAuth();
+  return (
+    <main className="login-main">
+      {loading ? (
+        <p role="status">Validando sesión…</p>
+      ) : (
+        <Notice tone="error">
+          {error}
+          <Button variant="secondary" onClick={retrySession}>
+            Reintentar
+          </Button>
+          <Button variant="ghost" onClick={signOut}>
+            Volver al acceso
+          </Button>
+        </Notice>
+      )}
+    </main>
+  );
+}
 
 function WorkspaceLayout() {
   const { user, signOut } = useAuth();
@@ -20,7 +43,9 @@ function WorkspaceLayout() {
   return (
     <AppShell
       userName={user!.name}
-      storageBytes={query.data ? getSummary(query.data).bytes : undefined}
+      storageBytes={query.data?.storageBytes}
+      capacityBytes={query.data?.policy.capacityBytes}
+      storageError={query.isError}
       onSignOut={logout}
     >
       <Outlet />
@@ -28,10 +53,12 @@ function WorkspaceLayout() {
   );
 }
 export function ProtectedWorkspace() {
-  const { user } = useAuth();
+  const { user, loading, error } = useAuth();
+  if (loading || error) return <SessionStatus />;
   return user ? <WorkspaceLayout /> : <Navigate to="/login" replace />;
 }
 export function GuestOnly({ children }: { children: React.ReactNode }) {
-  return useAuth().user ? <Navigate to="/dashboard" replace /> : children;
+  const { user, loading, error } = useAuth();
+  if (loading || error) return <SessionStatus />;
+  return user ? <Navigate to="/dashboard" replace /> : children;
 }
-

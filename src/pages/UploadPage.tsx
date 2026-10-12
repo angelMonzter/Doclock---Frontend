@@ -1,3 +1,5 @@
+import { SelectField } from '@/components/ui/SelectField';
+import { TextareaField } from '@/components/ui/TextareaField';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import {
@@ -17,7 +19,6 @@ import { RepositoryState } from '@/components/documents/RepositoryState';
 import { UploadDropzone } from '@/components/documents/UploadDropzone';
 import { UploadQueue } from '@/components/documents/UploadQueue';
 import { folderTrail } from '@/models/documents';
-import { filePolicy } from '@/config/files';
 
 export function UploadPage() {
   const query = useDocuments();
@@ -28,7 +29,6 @@ export function UploadPage() {
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [validate, setValidate] = useState(false);
-  const [simulateFailure, setSimulateFailure] = useState(false);
   const errorHeading = useRef<HTMLDivElement>(null);
   const successHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -47,11 +47,15 @@ export function UploadPage() {
       />
     );
   const data = query.data;
+  const policy = data.policy;
+  const disabled =
+    queue.busy || query.isError || !user?.permissions.puede_subir_archivos;
   const validDestination =
     !destination || data.folders.some((folder) => folder.id === destination);
   const returnPath = `/documentos${destination && validDestination ? `?carpeta=${destination}` : ''}`;
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (disabled) return;
     setValidate(true);
     const invalidTitle = queue.files.find(
       (file) => !file.error && !file.title.trim(),
@@ -68,19 +72,16 @@ export function UploadPage() {
       document.getElementById('upload-destination')?.focus();
       return;
     }
-    if (!category) {
+    if (!data.categories.some((item) => item.id === category)) {
       document.getElementById('upload-category')?.focus();
       return;
     }
-    await queue.submit(
-      {
-        folderId: destination || null,
-        categoryId: category,
-        description,
-        author: user!.name,
-      },
-      simulateFailure,
-    );
+    await queue.submit({
+      folderId: destination || null,
+      categoryId: category,
+      description,
+      author: user!.name,
+    });
   }
   return (
     <>
@@ -114,12 +115,9 @@ export function UploadPage() {
               ? 'archivo incorporado'
               : 'archivos incorporados'}
           </h2>
-          <p>
-            Ya puedes ver los registros en Documentos y en el resumen de Inicio.
-          </p>
+          <p>Los archivos se guardaron en el repositorio.</p>
           <Notice tone="success">
-            Simulación completada. Se guardaron solo metadatos en memoria;
-            ningún archivo se envió a un servidor.
+            Carga confirmada. Los documentos están disponibles en el sistema.
           </Notice>
           <ul>
             {queue.result.map((file) => (
@@ -137,7 +135,6 @@ export function UploadPage() {
               onClick={() => {
                 queue.reset();
                 setValidate(false);
-                setSimulateFailure(false);
               }}
             >
               Subir más archivos
@@ -155,14 +152,24 @@ export function UploadPage() {
             <div className="section-heading">
               <div>
                 <h2>Selecciona tus documentos</h2>
-                <p>
-                  Hasta {filePolicy.maxFiles} archivos por operación. No se
-                  enviará su contenido.
-                </p>
+                <p>Hasta {policy.maxFiles} archivos por operación.</p>
               </div>
-              <span className="count-label">Demo local</span>
+              <span className="count-label">Carga de archivos</span>
             </div>
-            <UploadDropzone disabled={queue.busy} onFiles={queue.addFiles} />
+            <UploadDropzone
+              policy={policy}
+              disabled={disabled || !policy.extensions.length}
+              onFiles={queue.addFiles}
+            />
+            {query.isError && (
+              <Notice tone="error">{query.error.message}</Notice>
+            )}
+            {!user?.permissions.puede_subir_archivos && (
+              <Notice>No tienes permiso para subir archivos.</Notice>
+            )}
+            {!policy.extensions.length && (
+              <Notice>No hay tipos de archivo activos permitidos.</Notice>
+            )}
             {queue.feedback && <Notice>{queue.feedback}</Notice>}
             <div
               ref={errorHeading}
@@ -202,96 +209,81 @@ export function UploadPage() {
                 </p>
               </div>
             </div>
-            <fieldset disabled={queue.busy} className="metadata-fields">
-              <label htmlFor="upload-destination">
-                Carpeta de destino
-                <select
-                  id="upload-destination"
-                  value={destination}
-                  onChange={(event) => setDestination(event.target.value)}
-                  aria-invalid={!validDestination}
-                  aria-describedby={
-                    !validDestination ? 'destination-error' : undefined
-                  }
-                >
-                  <option value="">Raíz del repositorio</option>
-                  {!validDestination && (
-                    <option value={destination}>Carpeta no disponible</option>
-                  )}
-                  {data.folders.map((folder) => (
-                    <option key={folder.id} value={folder.id}>
-                      {folderTrail(data.folders, folder.id)
-                        .map((item) => item.name)
-                        .join(' / ')}
-                    </option>
-                  ))}
-                </select>
+            <fieldset disabled={disabled} className="metadata-fields">
+              <SelectField
+                label="Carpeta de destino"
+                id="upload-destination"
+                value={destination}
+                onChange={(event) => setDestination(event.target.value)}
+                error={
+                  !validDestination
+                    ? 'Selecciona otra carpeta: este destino ya no existe.'
+                    : undefined
+                }
+              >
+                <option value="">Raíz del repositorio</option>
                 {!validDestination && (
-                  <span id="destination-error" className="field-error">
-                    Selecciona otra carpeta: este destino ya no existe.
-                  </span>
+                  <option value={destination}>Carpeta no disponible</option>
                 )}
-              </label>
-              <label htmlFor="upload-category">
-                Categoría <span className="required-label">(obligatoria)</span>
-                <select
-                  id="upload-category"
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                  aria-invalid={validate && !category}
-                  aria-describedby={
-                    validate && !category ? 'category-error' : undefined
-                  }
-                >
-                  <option value="">Selecciona una categoría</option>
-                  {data.categories.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-                {validate && !category && (
-                  <span className="field-error" id="category-error">
-                    Selecciona una categoría.
-                  </span>
-                )}
-              </label>
-              <label className="description-field" htmlFor="upload-description">
-                Descripción <span className="required-label">(opcional)</span>
-                <textarea
-                  id="upload-description"
-                  rows={3}
-                  maxLength={500}
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  placeholder="Agrega contexto para encontrar estos documentos después."
-                />
-                <span className="field-hint">
-                  {description.length}/500 caracteres
-                </span>
-              </label>
+                {data.folders.map((folder) => (
+                  <option key={folder.id} value={folder.id}>
+                    {folderTrail(data.folders, folder.id)
+                      .map((item) => item.name)
+                      .join(' / ')}
+                  </option>
+                ))}
+              </SelectField>
+              <SelectField
+                label={
+                  <>
+                    Categoría{' '}
+                    <span className="required-label">(obligatoria)</span>
+                  </>
+                }
+                id="upload-category"
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+                error={
+                  validate &&
+                  !data.categories.some((item) => item.id === category)
+                    ? 'Selecciona una categoría.'
+                    : undefined
+                }
+              >
+                <option value="">Selecciona una categoría</option>
+                {data.categories.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </SelectField>
+              <TextareaField
+                label={
+                  <>
+                    Descripción{' '}
+                    <span className="required-label">(opcional)</span>
+                  </>
+                }
+                id="upload-description"
+                rows={3}
+                maxLength={500}
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Agrega contexto para encontrar estos documentos después."
+                containerClassName="description-field"
+                hint={<>{description.length}/500 caracteres</>}
+              />
             </fieldset>
-            <details className="demo-tools">
-              <summary>Opciones de prueba</summary>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={simulateFailure}
-                  disabled={queue.busy}
-                  onChange={(event) => setSimulateFailure(event.target.checked)}
-                />{' '}
-                Simular un fallo para probar la recuperación
-              </label>
-            </details>
             <p className="demo-disclosure">
-              Carga simulada. Al salir de esta pantalla se descarta la cola
-              pendiente; los registros confirmados permanecen hasta recargar o
-              cerrar sesión.
+              Los archivos se confirman juntos. Si se pierde la conexión, revisa
+              Documentos antes de repetir el envío.
             </p>
             <div className="upload-submit-row">
               <p role="status">
                 {queue.busy
-                  ? `Simulando carga: ${queue.progress}%`
+                  ? queue.progress >= 99
+                    ? 'Confirmando almacenamiento…'
+                    : `Enviando archivos: ${queue.progress}%`
                   : `Archivos pendientes de confirmar: ${queue.files.length}`}
               </p>
               <div className="form-actions">
@@ -300,7 +292,10 @@ export function UploadPage() {
                     Cancelar carga
                   </Button>
                 )}
-                <Button type="submit" disabled={queue.busy}>
+                <Button
+                  type="submit"
+                  disabled={disabled || !policy.extensions.length}
+                >
                   <Upload size={17} />
                   {queue.busy
                     ? 'Incorporando…'

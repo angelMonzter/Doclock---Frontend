@@ -8,16 +8,22 @@ import {
   Menu,
   X,
   HardDrive,
-  Tags, Users, ShieldCheck, History, Palette, Settings2,
+  Tags,
+  Users,
+  ShieldCheck,
+  History,
+  Palette,
+  Settings2,
 } from 'lucide-react';
 import { Brand } from '@/components/brand/Brand';
 import { formatBytes } from '@/lib/format';
-import { filePolicy } from '@/config/files';
 import { brand } from '@/config/brand';
 
 type AppShellProps = {
   userName: string;
   storageBytes?: number;
+  capacityBytes?: number | null;
+  storageError?: boolean;
   onSignOut: () => void;
   children: ReactNode;
 };
@@ -25,6 +31,8 @@ type AppShellProps = {
 export function AppShell({
   userName,
   storageBytes,
+  capacityBytes,
+  storageError = false,
   onSignOut,
   children,
 }: AppShellProps) {
@@ -87,29 +95,57 @@ export function AppShell({
             <ArrowUpFromLine size={19} />
             Subir archivos
           </NavLink>
-          <NavLink to="/categorias"><Tags size={19} />Categorías</NavLink>
-          <NavLink to="/usuarios"><Users size={19} />Usuarios</NavLink>
-          <NavLink to="/roles"><ShieldCheck size={19} />Roles y permisos</NavLink>
-          <NavLink to="/historial"><History size={19} />Historial</NavLink>
-          <NavLink to="/apariencia"><Palette size={19} />Apariencia</NavLink>
-          <NavLink to="/configuracion-archivos"><Settings2 size={19} />Configuración de archivos</NavLink>
+          <NavLink to="/categorias">
+            <Tags size={19} />
+            Categorías
+          </NavLink>
+          <NavLink to="/usuarios">
+            <Users size={19} />
+            Usuarios
+          </NavLink>
+          <NavLink to="/roles">
+            <ShieldCheck size={19} />
+            Roles y permisos
+          </NavLink>
+          <NavLink to="/historial">
+            <History size={19} />
+            Historial
+          </NavLink>
+          <NavLink to="/apariencia">
+            <Palette size={19} />
+            Apariencia
+          </NavLink>
+          <NavLink to="/configuracion-archivos">
+            <Settings2 size={19} />
+            Configuración de archivos
+          </NavLink>
         </nav>
 
         <div className="sidebar-bottom">
           <div className="storage-summary">
             <HardDrive size={19} />
-            <strong>Espacio simulado</strong>
+            <strong>Espacio utilizado</strong>
             <p>
-              {storageBytes === undefined
-                ? 'Calculando…'
-                : `${formatBytes(storageBytes)} de ${formatBytes(filePolicy.capacityBytes)}`}
+              {storageError
+                ? 'No se pudo consultar el espacio.'
+                : storageBytes === undefined
+                  ? 'Calculando…'
+                  : capacityBytes == null
+                    ? `${formatBytes(storageBytes)} · Sin límite configurado`
+                    : `${formatBytes(storageBytes)} de ${formatBytes(capacityBytes)}`}
             </p>
             <progress
-              aria-label="Uso del almacenamiento simulado"
-              value={storageBytes ?? 0}
-              max={filePolicy.capacityBytes}
+              aria-label="Uso del almacenamiento"
+              value={
+                storageError || storageBytes === undefined
+                  ? undefined
+                  : capacityBytes === null
+                    ? 0
+                    : storageBytes
+              }
+              max={capacityBytes ?? 1}
             />
-            <span>Los archivos no se envían a un servidor.</span>
+            <span>Incluye versiones y archivos en papelera.</span>
           </div>
 
           <button type="button" className="logout-button" onClick={onSignOut}>
@@ -141,7 +177,7 @@ export function AppShell({
           </span>
           <div>
             <strong>{userName}</strong>
-            <span>Cuenta de demostración</span>
+            <span>Sesión activa</span>
           </div>
         </div>
       </header>
@@ -151,8 +187,7 @@ export function AppShell({
           {children}
         </main>
         <footer className="workspace-footer">
-          Datos de prueba · Los cambios del repositorio se reinician al
-          recargar.
+          Carpetas y configuración guardadas en el sistema.
         </footer>
       </div>
     </div>

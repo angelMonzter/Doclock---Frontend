@@ -88,37 +88,15 @@ body {
   gap: 12px;
   color: var(--primary);
 }
-.brand-mark {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #b4c6b9;
-  border-radius: 12px;
-}
-.brand-name {
+.brand-logo {
   display: block;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 23px;
-  line-height: 1.1;
-  letter-spacing: -0.035em;
+  width: 190px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
 }
-.brand-description {
-  display: block;
-  margin-top: 5px;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-}
-.brand-inverse {
-  color: #f5f7ed;
-}
-.brand-inverse .brand-mark {
-  border-color: #648478;
-  color: #d7e9bb;
-}
-.brand-inverse .brand-description {
-  color: #c1d4c8;
+.brand-inverse .brand-logo {
+  padding: 8px;
 }
 .story-body {
   max-width: 480px;

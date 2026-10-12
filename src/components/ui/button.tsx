@@ -14,7 +14,7 @@ const buttonVariants = cva('button', {
   },
   defaultVariants: { variant: 'primary', size: 'default' },
 });
-type ButtonProps = ComponentProps<'button'> &
+export type ButtonProps = ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & { asChild?: boolean };
 export function Button({
   className,

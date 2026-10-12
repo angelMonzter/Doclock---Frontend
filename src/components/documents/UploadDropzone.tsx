@@ -1,13 +1,15 @@
 import { useRef, useState } from 'react';
 import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { filePolicy } from '@/config/files';
+import type { FilePolicy } from '@/types/repository';
 import { formatBytes } from '@/lib/format';
 export function UploadDropzone({
   disabled,
+  policy,
   onFiles,
 }: {
   disabled: boolean;
+  policy: FilePolicy;
   onFiles: (files: FileList) => void;
 }) {
   const input = useRef<HTMLInputElement>(null);
@@ -43,7 +45,7 @@ export function UploadDropzone({
         type="file"
         multiple
         disabled={disabled}
-        accept={filePolicy.extensions.map((ext) => `.${ext}`).join(',')}
+        accept={policy.extensions.map((ext) => `.${ext}`).join(',')}
         aria-label="Seleccionar archivos desde tu equipo"
         onChange={(event) => {
           if (event.target.files) onFiles(event.target.files);
@@ -58,8 +60,8 @@ export function UploadDropzone({
         Seleccionar archivos
       </Button>
       <span>
-        {filePolicy.extensions.join(', ').toUpperCase()} · Hasta{' '}
-        {formatBytes(filePolicy.maxBytes)} por archivo
+        {policy.extensions.join(', ').toUpperCase()} · Hasta{' '}
+        {formatBytes(policy.maxBytes)} por archivo
       </span>
     </div>
   );

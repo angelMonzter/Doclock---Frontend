@@ -2,14 +2,16 @@ import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { FileIcon } from '@/components/documents/FileIcon';
 import { formatBytes, formatDate } from '@/lib/format';
-import type { DocumentFile, DocumentSnapshot } from '@/types/documents';
+import type { DocumentFile } from '@/types/documents';
+import type { RepositorySnapshot } from '@/types/repository';
+import { DocumentActions } from './DocumentActions';
 export function DocumentDetails({
   document,
   data,
   onClose,
 }: {
   document: DocumentFile;
-  data: DocumentSnapshot;
+  data: RepositorySnapshot;
   onClose: () => void;
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
@@ -80,10 +82,7 @@ export function DocumentDetails({
           <dd>{formatDate(document.createdAt)}</dd>
         </div>
       </dl>
-      <p className="demo-disclosure">
-        Registro de demostración. No almacenamos contenido; la descarga y la
-        vista previa del archivo no están disponibles.
-      </p>
+      <DocumentActions key={document.id} document={document} data={data} />
     </aside>
   );
 }

@@ -39,7 +39,7 @@ export function UploadQueue({
                   {file.error
                     ? 'Requiere atención'
                     : busy
-                      ? 'Simulando carga…'
+                      ? 'Enviando y confirmando…'
                       : 'Listo para confirmar'}
                 </span>
               </div>
@@ -77,7 +77,7 @@ export function UploadQueue({
               <progress
                 max={100}
                 value={progress}
-                aria-label={`Progreso simulado de ${file.name}`}
+                aria-label={`Progreso del lote que incluye ${file.name}`}
               />
             )}
           </li>

@@ -1341,3 +1341,20 @@
     flex: 1;
   }
 }
+.document-actions {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.document-actions .metadata-fields {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.document-actions input[type='file'] {
+  max-width: 100%;
+}
+
+.document-actions .activity-list li {
+  overflow-wrap: anywhere;
+}

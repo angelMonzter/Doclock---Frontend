@@ -22,7 +22,7 @@ export function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  if (!query.data) {
+  if (!query.data || query.isError) {
     return (
       <RepositoryState
         error={query.error}
@@ -34,7 +34,7 @@ export function DashboardPage() {
   }
 
   const data = query.data;
-  const summary = getSummary(data);
+  const summary = data.summary ?? getSummary(data);
   const recent = [...data.documents]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 5);
@@ -80,10 +80,10 @@ export function DashboardPage() {
 
         <div>
           <span>
-            <HardDrive size={18} /> Espacio simulado
+            <HardDrive size={18} /> Espacio utilizado
           </span>
-          <strong>{formatBytes(summary.bytes)}</strong>
-          <small>Suma de los tamaños registrados</small>
+          <strong>{formatBytes(data.storageBytes)}</strong>
+          <small>Incluye versiones y papelera</small>
         </div>
       </section>
 
@@ -114,7 +114,7 @@ export function DashboardPage() {
           <div className="section-heading">
             <div>
               <h2>Actividad reciente</h2>
-              <p>Movimientos de esta demostración.</p>
+              <p>Últimas incorporaciones al repositorio.</p>
             </div>
             <Clock3 size={19} aria-hidden="true" />
           </div>

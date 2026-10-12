@@ -92,3 +92,35 @@ Para una API real, implementar AuthService y DocumentService y sustituir sus ada
 
 Consulta AGENTS.md y docs/COMPONENTS.md antes de modificar componentes. No hay usuarios, auditoría completa ni configuración avanzada. En producción el servidor debe devolver index.html para las rutas de la SPA.
 
+
+## Conexión de login y usuarios
+
+<!-- //code mode usuarios: configuración y alcance de la integración real. -->
+
+Inicia backend con `npm run dev` en su carpeta y frontend con `npm run dev` en esta carpeta. Reinicia Vite si estaba abierto antes de estos cambios.
+
+El valor predeterminado de `VITE_API_URL` es `/api`. Vite redirige esas peticiones a `http://127.0.0.1:4000`, evitando diferencias entre localhost y 127.0.0.1 en CORS. Puedes crear `.env.local` a partir de `.env.example` y ajustar `API_PROXY_TARGET` si tu backend utiliza otro puerto. No pongas secretos en variables VITE_.
+
+En producción configura un proxy `/api` hacia el backend o define `VITE_API_URL` con su URL pública y habilita el origen del frontend en CORS del backend.
+
+Solo login, validación de sesión y CRUD de usuarios utilizan la API. El selector de roles hace consultas de lectura para asignar roles existentes; la pantalla de Roles y los demás módulos continúan sin conectar.
+
+Las cuentas se crean con contraseña, se editan conservando la actual si el campo queda vacío, se desactivan mediante DELETE y se reactivan desde Editar. El backend exige el permiso `puede_gestionar_usuarios`. No existe acceso de prueba ni registro público. La API registra el historial, pero la pantalla de Historial aún no está conectada.
+
+Ejecuta `npm test` para las pruebas del frontend y `npm run build` para comprobar TypeScript y generar la compilación. Las pruebas de esta integración simulan HTTP: no modifican datos de tu BD.
+
+## Control administrativo conectado
+
+<!-- //code mode control: alcance actual, adicional a login y Usuarios. -->
+
+Categorías, Roles y permisos, Historial, Apariencia y Configuración de archivos ya usan la API y no leen sus datos del adaptador dummy. Utilizan el mismo token y proxy configurados para Usuarios.
+
+- Categorías: consultar, crear, editar y activar/desactivar desde Activo.
+- Roles: consultar, crear y editar permisos y estado. Otro administrador debe modificar el rol de la propia sesión.
+- Historial: consulta de eventos reales, filtros y detalle de campos modificados.
+- Apariencia: lectura y guardado de configuración, conservando la vista previa. La ruta de imagen es una referencia S3; no sube imágenes ni cambia automáticamente el tema global.
+- Configuración de archivos: lectura y guardado de límites, papelera, descargas y reemplazos.
+
+Una configuración global inexistente se muestra como Sin configurar y se crea al guardar. Errores de red o permisos se muestran sin sustituir los datos por ejemplos. Documentos, carpetas, carga, tipos de archivo y mensajes conservan su transporte previo; esta integración no los conecta.
+
+Validación: npm test en frontend/backend y npm run build en frontend. Las pruebas usan HTTP/BD simulados; no crean registros en la base de datos del proyecto. Los contratos y consumidores se documentan en docs/COMPONENTS.md.

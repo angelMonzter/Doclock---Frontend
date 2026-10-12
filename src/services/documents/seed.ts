@@ -101,13 +101,11 @@ export function createSeed(): DocumentSnapshot {
     folders,
     categories,
     documents,
-    activity: documents
-      .slice(0, 5)
-      .map((doc) => ({
-        id: `activity-${doc.id}`,
-        text: `${doc.author} incorporó «${doc.title}».`,
-        createdAt: doc.createdAt,
-        documentId: doc.id,
-      })),
+    activity: documents.slice(0, 5).map((doc) => ({
+      id: `activity-${doc.id}`,
+      text: `${doc.author} incorporó «${doc.title}».`,
+      createdAt: doc.createdAt,
+      documentId: doc.id,
+    })),
   };
 }

@@ -1,0 +1,37 @@
+.data-table-scroll {
+  overflow-x: auto;
+}
+.data-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+.data-table :is(th, td) {
+  padding: 16px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+  max-width: 320px;
+  min-width: 110px;
+  vertical-align: top;
+}
+.data-table th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.data-table tbody tr:hover {
+  background: var(--surface-subtle);
+}
+
+.data-table-caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
