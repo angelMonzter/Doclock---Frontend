@@ -20,16 +20,20 @@ export type TrashItem = {
   name: string;
   kind: 'archivos' | 'carpetas';
 };
+export type TrashPage = PageResult<TrashItem> & { pendientes?: number };
+export type EmptyTrashResult = {
+  eliminados: number;
+  pendientes: number;
+  msg: string;
+};
 export interface DocumentActionsService {
+  emptyTrash(pendingOnly?: boolean): Promise<EmptyTrashResult>;
   versionsPage(
     id: string,
     request: PageRequest,
     signal?: AbortSignal,
   ): Promise<PageResult<Version>>;
-  trashPage(
-    request: PageRequest,
-    signal?: AbortSignal,
-  ): Promise<PageResult<TrashItem>>;
+  trashPage(request: PageRequest, signal?: AbortSignal): Promise<TrashPage>;
   upload(
     request: RealUpload,
     signal: AbortSignal,

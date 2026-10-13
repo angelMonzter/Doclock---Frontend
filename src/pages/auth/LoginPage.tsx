@@ -55,7 +55,7 @@ export function LoginPage() {
       </section>
       <section className="login-main" aria-labelledby="login-title">
         <div className="mobile-brand">
-          <Brand />
+          <Brand inverse />
         </div>
         <span className="environment-label">
           <span /> Acceso a tu organización

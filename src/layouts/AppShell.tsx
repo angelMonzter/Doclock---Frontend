@@ -1,3 +1,5 @@
+import { workspaceAccess } from '@/config/workspaceAccess';
+import type { AuthUser } from '@/types/auth';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router';
 import {
@@ -12,8 +14,6 @@ import {
   Users,
   ShieldCheck,
   History,
-  Palette,
-  Settings2,
 } from 'lucide-react';
 import { Brand } from '@/components/brand/Brand';
 import { formatBytes } from '@/lib/format';
@@ -21,6 +21,7 @@ import { brand } from '@/config/brand';
 
 type AppShellProps = {
   userName: string;
+  permissions: AuthUser['permissions'];
   storageBytes?: number;
   capacityBytes?: number | null;
   storageError?: boolean;
@@ -30,12 +31,14 @@ type AppShellProps = {
 
 export function AppShell({
   userName,
+  permissions,
   storageBytes,
   capacityBytes,
   storageError = false,
   onSignOut,
   children,
 }: AppShellProps) {
+  const access = workspaceAccess(permissions);
   const [open, setOpen] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
   const location = useLocation();
@@ -87,38 +90,42 @@ export function AppShell({
             <LayoutDashboard size={19} />
             Inicio
           </NavLink>
-          <NavLink to="/documentos">
-            <FolderClosed size={19} />
-            Documentos
-          </NavLink>
-          <NavLink to="/subir">
-            <ArrowUpFromLine size={19} />
-            Subir archivos
-          </NavLink>
-          <NavLink to="/categorias">
-            <Tags size={19} />
-            Categorías
-          </NavLink>
-          <NavLink to="/usuarios">
-            <Users size={19} />
-            Usuarios
-          </NavLink>
-          <NavLink to="/roles">
-            <ShieldCheck size={19} />
-            Roles y permisos
-          </NavLink>
-          <NavLink to="/historial">
-            <History size={19} />
-            Historial
-          </NavLink>
-          <NavLink to="/apariencia">
-            <Palette size={19} />
-            Apariencia
-          </NavLink>
-          <NavLink to="/configuracion-archivos">
-            <Settings2 size={19} />
-            Configuración de archivos
-          </NavLink>
+          {access.documents && (
+            <NavLink to="/documentos">
+              <FolderClosed size={19} />
+              Documentos
+            </NavLink>
+          )}
+          {access.upload && (
+            <NavLink to="/subir">
+              <ArrowUpFromLine size={19} />
+              Subir archivos
+            </NavLink>
+          )}
+          {access.categories && (
+            <NavLink to="/categorias">
+              <Tags size={19} />
+              Categorías
+            </NavLink>
+          )}
+          {access.users && (
+            <NavLink to="/usuarios">
+              <Users size={19} />
+              Usuarios
+            </NavLink>
+          )}
+          {access.users && (
+            <NavLink to="/roles">
+              <ShieldCheck size={19} />
+              Roles y permisos
+            </NavLink>
+          )}
+          {access.history && (
+            <NavLink to="/historial">
+              <History size={19} />
+              Historial
+            </NavLink>
+          )}
         </nav>
 
         <div className="sidebar-bottom">

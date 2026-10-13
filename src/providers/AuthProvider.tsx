@@ -68,6 +68,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => controller.abort();
   }, [attempt]);
 
+  useEffect(() => {
+    if (!user?.id) return;
+    let controller: AbortController | undefined;
+    async function refreshPermissions() {
+      const token = getToken();
+      if (!token || controller || document.visibilityState === 'hidden') return;
+      const request = new AbortController();
+      controller = request;
+      try {
+        const next = await authService.me(request.signal);
+        if (!request.signal.aborted && getToken() === token) setUser(next);
+      } catch {
+        // Los fallos transitorios conservan la sesión; HTTP 401 cierra el acceso.
+      } finally {
+        if (controller === request) controller = undefined;
+      }
+    }
+    window.addEventListener('focus', refreshPermissions);
+    document.addEventListener('visibilitychange', refreshPermissions);
+    return () => {
+      controller?.abort();
+      window.removeEventListener('focus', refreshPermissions);
+      document.removeEventListener('visibilitychange', refreshPermissions);
+    };
+  }, [user?.id]);
+
   function signIn(session: AuthSession) {
     void client.cancelQueries();
     client.clear();

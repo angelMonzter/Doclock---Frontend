@@ -95,8 +95,16 @@ it('muestra error del backend y enfoca el aviso', async () => {
   expect(notice.closest('[tabindex="-1"]')).toBe(window.document.activeElement);
 });
 
-it('un lector no recibe controles de edición', () => {
+it('un lector ve la edición deshabilitada y no puede guardar', async () => {
   auth.permissions.puede_editar_archivos = false;
+  const save = vi.spyOn(documentActionsService, 'update').mockResolvedValue();
   mount();
-  expect(screen.queryByText('Editar y mover documento')).toBeNull();
+  const user = userEvent.setup();
+  await user.click(screen.getByText('Editar y mover documento'));
+  expect(screen.getByLabelText('Título').matches(':disabled')).toBe(true);
+  await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+  expect(save).not.toHaveBeenCalled();
+  expect(
+    screen.getByText('Tu rol no permite editar ni mover documentos.'),
+  ).toBeTruthy();
 });

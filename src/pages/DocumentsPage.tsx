@@ -1,3 +1,4 @@
+import { workspaceAccess } from '@/config/workspaceAccess';
 import { Pagination } from '@/components/ui/Pagination';
 import { useLocalPagination } from '@/hooks/useLocalPagination';
 import { useDocumentList } from '@/hooks/documents/useDocumentList';
@@ -31,6 +32,7 @@ import { RepositoryTrash } from '@/components/documents/RepositoryTrash';
 export function DocumentsPage() {
   const query = useDocuments();
   const { user } = useAuth();
+  const access = workspaceAccess(user?.permissions);
   const [params, setParams] = useSearchParams();
   const listing = useDocumentList(params);
   const search = params.get('q') ?? '';
@@ -82,6 +84,12 @@ export function DocumentsPage() {
     setCreating(false);
     requestAnimationFrame(() => newFolderButton.current?.focus());
   }
+  if (!access.documents)
+    return (
+      <Notice tone="error">
+        No tienes permiso para consultar este módulo.
+      </Notice>
+    );
   if (!query.data || query.isError)
     return (
       <RepositoryState
@@ -104,20 +112,34 @@ export function DocumentsPage() {
       ? []
       : (listing.query.data?.items ?? []);
   const folders = localFolders.items;
-  const selected = listing.selected.isError ? undefined : listing.selected.data;
+  const selected =
+    !user?.permissions.puede_ver_archivos || listing.selected.isError
+      ? undefined
+      : listing.selected.data;
   return (
     <>
       <PageHeader
         title="Documentos"
         description="Cada archivo en su lugar. Encuentra lo que necesitas."
         action={
-          <Button asChild>
-            <Link to={`/subir${folder ? `?carpeta=${folder.id}` : ''}`}>
-              <Plus size={18} /> Subir archivos
-            </Link>
-          </Button>
+          <>
+            {access.upload ? (
+              <Button asChild>
+                <Link to={`/subir${folder ? `?carpeta=${folder.id}` : ''}`}>
+                  <Plus size={18} /> Subir archivos
+                </Link>
+              </Button>
+            ) : (
+              <Button disabled title="Tu rol no permite subir archivos.">
+                <Plus size={18} /> Subir archivos
+              </Button>
+            )}
+          </>
         }
       />
+      {!access.upload && (
+        <p className="muted-text">Tu rol no permite subir archivos.</p>
+      )}
       <nav className="breadcrumbs" aria-label="Ruta de carpetas">
         <Link to="/documentos">Todos los documentos</Link>
         {trail.map((item, index) => (
@@ -249,6 +271,11 @@ export function DocumentsPage() {
                   <FolderPlus size={17} /> Nueva carpeta
                 </Button>
               </div>
+              {!user?.permissions.puede_gestionar_carpetas && (
+                <p className="muted-text">
+                  Tu rol no permite crear ni administrar carpetas.
+                </p>
+              )}
               {creating && (
                 <CreateFolderForm
                   parentId={folderId}
@@ -353,13 +380,24 @@ export function DocumentsPage() {
                       Limpiar filtros
                     </Button>
                   ) : (
-                    <Button asChild>
-                      <Link
-                        to={`/subir${folder ? `?carpeta=${folder.id}` : ''}`}
-                      >
-                        Subir archivos
-                      </Link>
-                    </Button>
+                    <>
+                      {access.upload ? (
+                        <Button asChild>
+                          <Link
+                            to={`/subir${folder ? `?carpeta=${folder.id}` : ''}`}
+                          >
+                            Subir archivos
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button
+                          disabled
+                          title="Tu rol no permite subir archivos."
+                        >
+                          Subir archivos
+                        </Button>
+                      )}
+                    </>
                   )
                 }
               />

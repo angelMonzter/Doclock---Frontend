@@ -1,3 +1,4 @@
+import { useAuth } from '@/providers/AuthProvider';
 import { useEffect, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,8 @@ export function CreateFolderForm({
   onClose: () => void;
   onCreated: (name: string) => void;
 }) {
+  const { user } = useAuth();
+  const canManage = Boolean(user?.permissions.puede_gestionar_carpetas);
   const [name, setName] = useState('');
   const input = useRef<HTMLInputElement>(null);
   const refresh = useRefreshDocuments();
@@ -33,7 +36,7 @@ export function CreateFolderForm({
       className="folder-form panel"
       onSubmit={(event) => {
         event.preventDefault();
-        mutation.mutate();
+        if (canManage) mutation.mutate();
       }}
       noValidate
     >
@@ -46,12 +49,12 @@ export function CreateFolderForm({
         value={name}
         onChange={(event) => setName(event.target.value)}
         maxLength={150}
-        disabled={mutation.isPending}
+        disabled={mutation.isPending || !canManage}
         error={mutation.error?.message}
         placeholder="Por ejemplo: Proyectos del trimestre"
       />
       <div className="form-actions">
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button type="submit" disabled={mutation.isPending || !canManage}>
           {mutation.isPending ? 'Creando…' : 'Crear carpeta'}
         </Button>
         <Button variant="ghost" onClick={onClose} disabled={mutation.isPending}>

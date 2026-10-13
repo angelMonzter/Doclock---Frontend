@@ -118,14 +118,19 @@ export function RoleForm({ record, onClose, onSaved }: RoleFormProps) {
         }
       />
       <CheckboxField
-        id="admin-roles-puede_gestionar_configuracion"
-        label="Gestionar configuración"
+        id="admin-roles-puede_vaciar_papelera"
+        label="Vaciar papelera (eliminación definitiva)"
         containerClassName="admin-checkbox"
-        checked={Boolean(values.puede_gestionar_configuracion)}
+        checked={Boolean(values.puede_vaciar_papelera)}
         onChange={(event) =>
-          setValue('puede_gestionar_configuracion', event.target.checked)
+          setValue('puede_vaciar_papelera', event.target.checked)
         }
       />
+      <p className="muted-text admin-wide">
+        Para vaciar la papelera también se necesita el permiso Ver archivos.
+        Esta acción no se puede deshacer.
+      </p>
+      {/* El permiso de configuración se conserva en values, pero no se edita aquí. */}
       <CheckboxField
         id="admin-roles-activo"
         label="Activo"

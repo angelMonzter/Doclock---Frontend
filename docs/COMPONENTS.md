@@ -182,3 +182,30 @@ Esta sección reemplaza las referencias anteriores a datos simulados para Catego
 
 - Brand utiliza `src/logo_sistema.png` en lugar del icono y los textos de marca. Conserva las props `inverse` (false por defecto) y `className`.
 - Consumidores: menú lateral de AppShell y login de escritorio/móvil. La imagen conserva su proporción, ancho máximo adaptable y texto alternativo; inverse proporciona fondo blanco para mantener el contraste sobre el panel oscuro.
+- Login: la variante inverse utiliza `logo_sistema_white.png` en escritorio y móvil. En móvil se añade fondo primario al logo para que el blanco sea legible. AppShell mantiene `logo_sistema.png` mediante la variante predeterminada.
+
+## Paleta azul y configuración temporalmente oculta
+
+- La identidad visual usa primary #262c62, hover #1d224d, foco #505aa0 y superficies azules suaves. Se conservan estructura, dimensiones, colores semánticos de avisos y colores por tipo de archivo.
+- AppShell oculta los accesos a Apariencia y Configuración de archivos. Las rutas y permisos del backend se mantienen.
+- RoleForm omite la casilla Gestionar configuración; useControlForm conserva el valor cargado del rol y lo envía sin alterarlo. Los roles nuevos conservan el valor predeterminado false. No se modifica la definición del permiso ni datos existentes.
+
+
+## Interfaz según permisos de rol
+
+- `workspaceAccess` centraliza el acceso de navegación: Inicio para toda sesión; Documentos con lectura o gestión de carpetas; Subir con permiso de carga; Categorías con lectura, carga, edición o gestión de categorías; Usuarios/Roles con gestión de usuarios; Historial con lectura de historial. Apariencia y Configuración de archivos permanecen ocultas.
+- `AppShell` es una composición del sistema: recibe `permissions` tipado desde `WorkspaceLayout`, su único consumidor de producción. Conserva navegación, estilos, apertura móvil y retorno de foco con Escape.
+- `DocumentActions`, `DocumentVersions`, `FolderActions` y `RepositoryTrash` pertenecen al módulo documental. Mantienen visibles las acciones restringidas con controles nativos deshabilitados y motivos en texto. Respetan también las políticas globales de descarga y reemplazo. Los servicios y operaciones existentes no cambian.
+- `DocumentsPage` impide el acceso sin lectura ni gestión de carpetas y no muestra detalles de archivos al perder lectura. Inicio y Documentos deshabilitan las entradas de carga sin permiso; UploadPage mantiene la validación existente y vuelve a Inicio cuando el usuario no puede entrar al explorador.
+- CategoriesPage conserva consulta y filtros con edición deshabilitada para lectores. CreateFolderForm bloquea el guardado al perder permiso; Cancelar sigue disponible. No cambian contratos ni estilos de components/ui.
+- AuthProvider vuelve a consultar `/auth/me` al recuperar foco o visibilidad, sin desmontar formularios durante la consulta. Un fallo transitorio conserva la sesión; el tratamiento existente de HTTP 401 sigue cerrándola. El backend continúa validando cada operación.
+- Pruebas con HTTP simulado: menú por combinaciones de permisos, lector sin mutaciones, actualización de sesión y fallo de red, además de compilación y revisión adaptable/teclado. No se modifican backend, MySQL ni S3.
+
+
+## Vaciar papelera e historial legible
+
+- `EmptyTrashActions` pertenece al módulo documental; su único consumidor es `RepositoryTrash`. Recibe `total`, `pending`, `busy` (false por defecto) y `onBusyChange`. Compone Button/Notice sin cambiar sus variantes ni estilos compartidos. Conserva el foco al cancelar, admite Escape, explica la acción irreversible y bloquea confirmación/restauración mientras se procesa.
+- `DocumentActionsService.emptyTrash(pendingOnly = false)` usa POST `/archivos/papelera/vaciar`; el reintento envía `solo_pendientes: true` y no vacía elementos nuevos. `TrashPage` conserva la paginación e incorpora `pendientes` opcional para tolerar respuestas previas.
+- El permiso `puede_vaciar_papelera` se edita en RoleForm y se mantiene independiente de enviar a papelera/restaurar. Requiere además Ver archivos. Se presenta deshabilitado con explicación para otros roles. Se conserva la prohibición existente de editar el propio rol.
+- Historial muestra actor, acción y nombre en lenguaje natural. Los datos originales permanecen en BD; la interfaz omite identificadores, rutas y secretos en los detalles, y traduce los tipos de acción. Los eventos antiguos se presentan con los nombres disponibles sin inventar datos faltantes.
+- Pruebas de frontend cubren confirmación, cancelación/foco, permiso denegado y error/reintento. `scripts/trash-ui-check.cjs` intercepta HTTP para revisar 320/768/1024/1440 px e historial sin borrar datos reales.

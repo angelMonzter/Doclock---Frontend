@@ -1,3 +1,4 @@
+import { workspaceAccess } from '@/config/workspaceAccess';
 import {
   ArrowRight,
   ArrowUpFromLine,
@@ -20,6 +21,7 @@ import { formatBytes, formatDate } from '@/lib/format';
 export function DashboardPage() {
   const query = useDocuments();
   const { user } = useAuth();
+  const access = workspaceAccess(user?.permissions);
   const navigate = useNavigate();
 
   if (!query.data || query.isError) {
@@ -45,14 +47,25 @@ export function DashboardPage() {
         title={`Hola, ${user?.name ?? 'de nuevo'}`}
         description="Tu trabajo, organizado. Esto es lo que hay en tu espacio."
         action={
-          <Button asChild>
-            <Link to="/subir">
-              <Plus size={18} /> Subir archivos
-            </Link>
-          </Button>
+          <>
+            {access.upload ? (
+              <Button asChild>
+                <Link to="/subir">
+                  <Plus size={18} /> Subir archivos
+                </Link>
+              </Button>
+            ) : (
+              <Button disabled title="Tu rol no permite subir archivos.">
+                <Plus size={18} /> Subir archivos
+              </Button>
+            )}
+          </>
         }
       />
 
+      {!access.upload && (
+        <p className="muted-text">Tu rol no permite subir archivos.</p>
+      )}
       <section className="stats-row" aria-label="Resumen del repositorio">
         <div>
           <span>
@@ -105,9 +118,19 @@ export function DashboardPage() {
             }
           />
 
-          <Link className="section-link" to="/documentos">
-            Ver todos los documentos <ArrowRight size={16} />
-          </Link>
+          {access.documents ? (
+            <Link className="section-link" to="/documentos">
+              Ver todos los documentos <ArrowRight size={16} />
+            </Link>
+          ) : (
+            <span
+              className="section-link"
+              aria-disabled="true"
+              title="Tu rol no permite consultar documentos."
+            >
+              Ver todos los documentos <ArrowRight size={16} />
+            </span>
+          )}
         </section>
 
         <section className="panel activity-panel">

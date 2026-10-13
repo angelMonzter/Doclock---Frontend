@@ -1,3 +1,4 @@
+import { workspaceAccess } from '@/config/workspaceAccess';
 import { SelectField } from '@/components/ui/SelectField';
 import { TextareaField } from '@/components/ui/TextareaField';
 import { useEffect, useRef, useState } from 'react';
@@ -24,6 +25,7 @@ export function UploadPage() {
   const query = useDocuments();
   const queue = useUploadQueue();
   const { user } = useAuth();
+  const access = workspaceAccess(user?.permissions);
   const [params] = useSearchParams();
   const [destination, setDestination] = useState(params.get('carpeta') ?? '');
   const [category, setCategory] = useState('');
@@ -52,7 +54,9 @@ export function UploadPage() {
     queue.busy || query.isError || !user?.permissions.puede_subir_archivos;
   const validDestination =
     !destination || data.folders.some((folder) => folder.id === destination);
-  const returnPath = `/documentos${destination && validDestination ? `?carpeta=${destination}` : ''}`;
+  const returnPath = access.documents
+    ? `/documentos${destination && validDestination ? `?carpeta=${destination}` : ''}`
+    : '/dashboard';
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (disabled) return;
@@ -86,7 +90,8 @@ export function UploadPage() {
   return (
     <>
       <Link to={returnPath} className="back-link">
-        <ArrowLeft size={16} /> Volver a documentos
+        <ArrowLeft size={16} />{' '}
+        {access.documents ? 'Volver a documentos' : 'Volver al inicio'}
       </Link>
       <PageHeader
         title="Un nuevo lugar para tus archivos"
@@ -127,7 +132,8 @@ export function UploadPage() {
           <div className="form-actions">
             <Button asChild>
               <Link to={returnPath}>
-                Ver documentos <ArrowRight size={17} />
+                {access.documents ? 'Ver documentos' : 'Volver al inicio'}{' '}
+                <ArrowRight size={17} />
               </Link>
             </Button>
             <Button

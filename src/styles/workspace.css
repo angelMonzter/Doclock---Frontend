@@ -1,7 +1,7 @@
 :root {
   --surface: #ffffff;
-  --surface-subtle: #f1f4ed;
-  --surface-selected: #e4eddf;
+  --surface-subtle: #f3f4fa;
+  --surface-selected: #e8eaf6;
   --warning: #805614;
   --warning-surface: #fff4de;
   --success: #27502c;
@@ -309,6 +309,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
+  margin-bottom: 15px;
   min-width: 0;
 }
 .section-heading {

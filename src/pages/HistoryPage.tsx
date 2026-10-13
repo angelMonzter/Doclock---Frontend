@@ -1,7 +1,12 @@
 //code mode control: historial real y diferencias parciales de la API.
 import { SelectField } from '@/components/ui/SelectField';
 import { useState } from 'react';
-import { entityLabels, historyChanges } from '@/models/history';
+import {
+  actionLabels,
+  entityLabels,
+  historyChanges,
+  historyDescription,
+} from '@/models/history';
 import { useHistory } from '@/hooks/administration/useHistory';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { TextField } from '@/components/ui/TextField';
@@ -42,7 +47,7 @@ export function HistoryPage() {
     <div className="admin-module">
       <PageHeader
         title="Historial"
-        description="Consulta los cambios realizados en los módulos de administración."
+        description="Consulta quién realizó cada acción y qué cambió en el sistema."
       />
       <p className="demo-disclosure">
         Bitácora de los movimientos registrados por el sistema, de solo lectura.
@@ -87,7 +92,7 @@ export function HistoryPage() {
               ]),
             ].map((value) => (
               <option key={value} value={value}>
-                {value}
+                {actionLabels[value] ?? value.replaceAll('_', ' ')}
               </option>
             ))}
           </SelectField>
@@ -140,7 +145,7 @@ export function HistoryPage() {
                 {rows.map((event) => (
                   <li key={event.id}>
                     <div>
-                      <h2>{event.description}</h2>
+                      <h2>{historyDescription(event)}</h2>
                       <p>
                         {event.actor} ·{' '}
                         {entityLabels[event.entity] ?? event.entity} ·{' '}
@@ -152,8 +157,9 @@ export function HistoryPage() {
                     <details>
                       <summary>Ver cambios</summary>
                       <p>
-                        Registro: {event.recordId ?? 'Sin registro'} · Acción:{' '}
-                        {event.action}
+                        Acción:{' '}
+                        {actionLabels[event.action] ??
+                          event.action.replaceAll('_', ' ')}
                       </p>
                       <dl>
                         {historyChanges(event).map((change) => (
@@ -166,7 +172,7 @@ export function HistoryPage() {
                         ))}
                       </dl>
                       {historyChanges(event).length === 0 && (
-                        <p>Sin detalle de campos.</p>
+                        <p>La descripción resume la acción realizada.</p>
                       )}
                     </details>
                   </li>
@@ -175,7 +181,7 @@ export function HistoryPage() {
             ) : (
               <EmptyState
                 title="Sin movimientos"
-                description="Los cambios de administración aparecerán aquí. Si ya realizaste cambios, revisa los filtros."
+                description="Las acciones realizadas aparecerán aquí. Si ya realizaste cambios, revisa los filtros."
               />
             )}
           </>

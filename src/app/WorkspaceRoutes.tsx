@@ -43,6 +43,7 @@ function WorkspaceLayout() {
   return (
     <AppShell
       userName={user!.name}
+      permissions={user!.permissions}
       storageBytes={query.data?.storageBytes}
       capacityBytes={query.data?.policy.capacityBytes}
       storageError={query.isError}

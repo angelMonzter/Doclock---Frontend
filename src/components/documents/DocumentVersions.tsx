@@ -45,6 +45,12 @@ export function DocumentVersions({
       type: 'replace' | 'restore' | 'download';
       id?: string;
     }) => {
+      if (operation.type !== 'download' && !canEdit) return;
+      if (
+        operation.type === 'download' &&
+        (!user?.permissions.puede_ver_archivos || !data.policy.allowDownloads)
+      )
+        return;
       if (operation.type === 'replace') {
         if (!file) throw new Error('Selecciona un archivo.');
         const error = validateFile(file, data.policy);
@@ -62,6 +68,13 @@ export function DocumentVersions({
   return (
     <details onToggle={(event) => setOpen(event.currentTarget.open)}>
       <summary>Versiones del documento</summary>
+      {!canEdit && (
+        <p className="muted-text">
+          {!user?.permissions.puede_editar_archivos
+            ? 'Tu rol no permite subir ni restaurar versiones.'
+            : 'El reemplazo de archivos está desactivado en la configuración del sistema.'}
+        </p>
+      )}
       {query.isFetching && <p role="status">Consultando versiones…</p>}
       {query.error && (
         <Notice tone="error">
@@ -114,15 +127,13 @@ export function DocumentVersions({
                   >
                     Descargar versión {version.numero_version}
                   </Button>
-                  {canEdit && (
-                    <Button
-                      variant="ghost"
-                      disabled={action.isPending}
-                      onClick={() => setConfirmation(version.id_version)}
-                    >
-                      Restaurar versión {version.numero_version}
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    disabled={action.isPending || !canEdit}
+                    onClick={() => setConfirmation(version.id_version)}
+                  >
+                    Restaurar versión {version.numero_version}
+                  </Button>
                 </div>
               </div>
             </li>
@@ -133,7 +144,7 @@ export function DocumentVersions({
           Esta versión pasará a ser la vigente; las demás se conservarán.
           <div className="form-actions">
             <Button
-              disabled={action.isPending}
+              disabled={action.isPending || !canEdit}
               onClick={() =>
                 action.mutate({ type: 'restore', id: confirmation })
               }
@@ -146,33 +157,34 @@ export function DocumentVersions({
           </div>
         </Notice>
       )}
-      {canEdit && (
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            action.mutate({ type: 'replace' });
-          }}
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          action.mutate({ type: 'replace' });
+        }}
+      >
+        <fieldset
+          disabled={action.isPending || !canEdit}
+          className="metadata-fields"
         >
-          <fieldset disabled={action.isPending} className="metadata-fields">
-            <TextField
-              label="Nueva versión"
-              type="file"
-              required
-              accept={data.policy.extensions.map((ext) => '.' + ext).join(',')}
-              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-            />
-            <TextField
-              label="Comentario"
-              maxLength={500}
-              value={comment}
-              onChange={(event) => setComment(event.target.value)}
-            />
-            <Button type="submit">
-              {action.isPending ? 'Guardando versión…' : 'Subir nueva versión'}
-            </Button>
-          </fieldset>
-        </form>
-      )}
+          <TextField
+            label="Nueva versión"
+            type="file"
+            required
+            accept={data.policy.extensions.map((ext) => '.' + ext).join(',')}
+            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+          />
+          <TextField
+            label="Comentario"
+            maxLength={500}
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+          />
+          <Button type="submit">
+            {action.isPending ? 'Guardando versión…' : 'Subir nueva versión'}
+          </Button>
+        </fieldset>
+      </form>
     </details>
   );
 }

@@ -19,16 +19,22 @@ export function FolderActions({
   folders: Folder[];
 }) {
   const { user } = useAuth();
+  const canManage = Boolean(user?.permissions.puede_gestionar_carpetas);
   const [draft, setDraft] = useState(folder);
   const [confirm, setConfirm] = useState(false);
   const action = useDocumentAction(async (operation: 'save' | 'delete') => {
+    if (!canManage) return;
     if (operation === 'save') await repositoryService.updateFolder(draft);
     else await documentActionsService.remove('carpetas', folder.id);
   });
-  if (!user?.permissions.puede_gestionar_carpetas) return null;
   return (
     <details className="panel">
       <summary>Administrar esta carpeta</summary>
+      {!canManage && (
+        <p className="muted-text">
+          Tu rol no permite modificar ni enviar carpetas a papelera.
+        </p>
+      )}
       {action.error && <Notice tone="error">{action.error.message}</Notice>}
       {action.isSuccess && <Notice tone="success">Carpeta actualizada.</Notice>}
       <form
@@ -37,7 +43,10 @@ export function FolderActions({
           action.mutate('save');
         }}
       >
-        <fieldset disabled={action.isPending} className="metadata-fields">
+        <fieldset
+          disabled={action.isPending || !canManage}
+          className="metadata-fields"
+        >
           <TextField
             label="Nombre"
             required
@@ -78,7 +87,7 @@ export function FolderActions({
           Solo pueden enviarse a papelera carpetas vacías.
           <div className="form-actions">
             <Button
-              disabled={action.isPending}
+              disabled={action.isPending || !canManage}
               onClick={() => action.mutate('delete')}
             >
               Confirmar envío a papelera
@@ -93,7 +102,11 @@ export function FolderActions({
           </div>
         </Notice>
       ) : (
-        <Button variant="ghost" onClick={() => setConfirm(true)}>
+        <Button
+          variant="ghost"
+          disabled={action.isPending || !canManage}
+          onClick={() => setConfirm(true)}
+        >
           Enviar carpeta a papelera
         </Button>
       )}

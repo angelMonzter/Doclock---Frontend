@@ -9,6 +9,11 @@ import type { DocumentActionsService } from '@/types/documentActions';
 
 //code mode S3: un solo lote HTTP conserva la atomicidad de la API.
 export const documentActionsService: DocumentActionsService = {
+  emptyTrash: (pendingOnly = false) =>
+    apiRequest('/archivos/papelera/vaciar', {
+      method: 'POST',
+      body: JSON.stringify({ solo_pendientes: pendingOnly }),
+    }),
   versionsPage: (id, request, signal) =>
     readPage(
       '/archivos/' + encodeURIComponent(id) + '/versiones',

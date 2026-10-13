@@ -97,6 +97,11 @@ export function CategoriesPage() {
       <p className="demo-disclosure">
         Los cambios se guardan en el sistema y se registran en el historial.
       </p>
+      {!canWrite && (
+        <p className="muted-text">
+          Tu rol permite consultar categorías, pero no crearlas ni modificarlas.
+        </p>
+      )}
       {saved && (
         <Notice tone="success">Cambios guardados correctamente.</Notice>
       )}
@@ -114,7 +119,7 @@ export function CategoriesPage() {
         </Notice>
       )}
       {query.data &&
-        (editing ? (
+        (editing && canWrite ? (
           <CategoryForm
             record={editing === 'new' ? undefined : editing}
             onClose={close}

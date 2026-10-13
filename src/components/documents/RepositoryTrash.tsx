@@ -8,12 +8,14 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useDocumentAction } from '@/hooks/documents/useDocumentAction';
 import { documentActionsService } from '@/services/documents/documentActionsService';
 import type { TrashItem } from '@/types/documentActions';
+import { EmptyTrashActions } from './EmptyTrashActions';
 
-//code mode S3: papelera lógica; no ofrece purga física.
+//code mode S3: restauración y eliminación definitiva con permiso independiente.
 export function RepositoryTrash() {
   const { user } = useAuth();
   const pagination = usePagination();
   const [open, setOpen] = useState(false);
+  const [emptying, setEmptying] = useState(false);
   const query = useQuery({
     queryKey: ['documentTrash', user?.id, pagination.request],
     queryFn: ({ signal }) =>
@@ -22,6 +24,14 @@ export function RepositoryTrash() {
     enabled: open && Boolean(user?.permissions.puede_ver_archivos),
   });
   const action = useDocumentAction(async (item: TrashItem) => {
+    if (
+      !user?.permissions[
+        item.kind === 'carpetas'
+          ? 'puede_gestionar_carpetas'
+          : 'puede_eliminar_archivos'
+      ]
+    )
+      return;
     await documentActionsService.restore(item.kind, item.id);
   });
   if (!user?.permissions.puede_ver_archivos) return null;
@@ -44,6 +54,12 @@ export function RepositoryTrash() {
       )}
       {action.error && <Notice tone="error">{action.error.message}</Notice>}
       {action.isSuccess && <Notice tone="success">Elemento restaurado.</Notice>}
+      <EmptyTrashActions
+        total={query.data?.total ?? 0}
+        pending={query.data?.pendientes ?? 0}
+        busy={query.isFetching || query.isError || action.isPending}
+        onBusyChange={setEmptying}
+      />
       {query.data && (
         <Pagination
           label="Paginación de papelera"
@@ -54,7 +70,7 @@ export function RepositoryTrash() {
           }
           pageSize={pagination.request.pageSize}
           total={query.data.total}
-          busy={query.isFetching || action.isPending}
+          busy={query.isFetching || action.isPending || emptying}
           onPageChange={pagination.setPage}
           onPageSizeChange={pagination.setPageSize}
         />
@@ -68,10 +84,21 @@ export function RepositoryTrash() {
               <div>
                 <strong>{item.name}</strong>
                 <p>{item.kind === 'carpetas' ? 'Carpeta' : 'Documento'}</p>
+                {!user?.permissions[
+                  item.kind === 'carpetas'
+                    ? 'puede_gestionar_carpetas'
+                    : 'puede_eliminar_archivos'
+                ] && (
+                  <p className="muted-text">
+                    Tu rol no permite restaurar{' '}
+                    {item.kind === 'carpetas' ? 'carpetas' : 'documentos'}.
+                  </p>
+                )}
                 <Button
                   variant="secondary"
                   disabled={
                     action.isPending ||
+                    emptying ||
                     !user?.permissions[
                       item.kind === 'carpetas'
                         ? 'puede_gestionar_carpetas'

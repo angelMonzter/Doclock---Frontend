@@ -39,16 +39,18 @@ export function Pagination({
         ))}
       </SelectField>
       <Button
+        style={{ marginTop: 25 }}
         variant="secondary"
         disabled={busy || page <= 1}
         onClick={() => onPageChange(page - 1)}
       >
         Anterior
       </Button>
-      <span role="status">
+      <span role="status" style={{ marginTop: 25 }}>
         Página {page} de {pages} · {total} registros
       </span>
       <Button
+        style={{ marginTop: 25 }}
         variant="secondary"
         disabled={busy || page >= pages}
         onClick={() => onPageChange(page + 1)}

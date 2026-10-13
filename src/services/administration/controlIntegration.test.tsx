@@ -206,6 +206,29 @@ it('guarda permisos y bloquea la edición del rol de la sesión', async () => {
   });
 });
 
+it('conserva el permiso de configuración al editar un rol sin mostrar su casilla', async () => {
+  records = [
+    {
+      ...defaultValues('roles'),
+      id_rol: 'ROLE000002',
+      nombre: 'Supervisor',
+      puede_gestionar_configuracion: 1,
+    },
+  ];
+  const user = userEvent.setup();
+  mount(<RolesPage />);
+  await user.click(
+    await screen.findByRole('button', { name: 'Editar Supervisor' }),
+  );
+  expect(screen.queryByLabelText('Gestionar configuración')).toBeNull();
+  await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+  await screen.findByText('Cambios guardados correctamente.');
+  expect(
+    requests.find((request) => request.method === 'PATCH')?.body
+      .puede_gestionar_configuracion,
+  ).toBe(1);
+});
+
 it.each([
   ['appearance', <AppearancePage />, '/configuracion/apariencia'],
   ['fileSettings', <FileSettingsPage />, '/configuracion/archivos'],
@@ -335,13 +358,15 @@ it('muestra historial SQL con JSON parcial, entidades desconocidas y registros e
   expect(events[0].actor).toBe('Admin real');
   expect(events[0].date).toBe('2026-10-06T12:00:00Z');
   mount(<HistoryPage />);
-  await screen.findByText('Categoría modificada');
-  expect(screen.getByText('Registro eliminado')).toBeTruthy();
+  await screen.findByText('Admin real actualizó la categoría «Nuevo».');
+  expect(screen.getByText('Admin real: Registro eliminado')).toBeTruthy();
   expect(screen.queryByText('oculto')).toBeNull();
   const user = userEvent.setup();
   await user.selectOptions(screen.getByLabelText('Acción'), 'eliminar');
   await waitFor(() =>
-    expect(screen.queryByText('Categoría modificada')).toBeNull(),
+    expect(
+      screen.queryByText('Admin real actualizó la categoría «Nuevo».'),
+    ).toBeNull(),
   );
 });
 
@@ -355,18 +380,22 @@ it('consulta una página de historial y reinicia la página al filtrar', async (
     fecha_evento: '2026-10-11 12:00:00',
     sid_entidad: null,
     datos_anteriores: null,
-    datos_nuevos: null,
+    datos_nuevos: { titulo: `Movimiento ${index + 1}` },
   }));
   mount(<HistoryPage />);
-  await screen.findByText('Movimiento 1');
-  expect(screen.queryByText('Movimiento 26')).toBeNull();
+  await screen.findByText('Admin subió el archivo «Movimiento 1».');
+  expect(
+    screen.queryByText('Admin subió el archivo «Movimiento 26».'),
+  ).toBeNull();
   expect(
     requests.filter((request) => request.path === '/historial'),
   ).toHaveLength(1);
   const user = userEvent.setup();
   await user.click(screen.getByRole('button', { name: 'Siguiente' }));
-  await screen.findByText('Movimiento 26');
-  expect(screen.queryByText('Movimiento 1')).toBeNull();
+  await screen.findByText('Admin subió el archivo «Movimiento 26».');
+  expect(
+    screen.queryByText('Admin subió el archivo «Movimiento 1».'),
+  ).toBeNull();
   expect(
     screen.getByRole('button', { name: 'Siguiente' }).hasAttribute('disabled'),
   ).toBe(true);
@@ -374,7 +403,7 @@ it('consulta una página de historial y reinicia la página al filtrar', async (
     screen.getByLabelText('Buscar por descripción o usuario'),
     'Movimiento 1',
   );
-  await screen.findByText('Movimiento 1');
+  await screen.findByText('Admin subió el archivo «Movimiento 1».');
   await waitFor(() => expect(screen.getByText(/Página 1 de 1/)).toBeTruthy());
 });
 

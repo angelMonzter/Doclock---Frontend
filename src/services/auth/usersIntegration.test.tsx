@@ -3,6 +3,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   cleanup,
+  fireEvent,
   render,
   screen,
   waitFor,
@@ -190,6 +191,32 @@ async function authenticated() {
 }
 
 describe('login y usuarios reales', () => {
+  it('actualiza permisos al recuperar foco y retira el acceso al módulo', async () => {
+    await authenticated();
+    permission = 0;
+    fireEvent.focus(window);
+    await screen.findByText('No tienes permiso para gestionar usuarios.');
+    expect(screen.queryByRole('link', { name: 'Usuarios' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Crear usuario' })).toBeNull();
+    expect(getToken()).toBe('token-real-simulado');
+  });
+
+  it('conserva la pantalla y sesión si la actualización de permisos falla por red', async () => {
+    await authenticated();
+    const previous = requests.filter(
+      (request) => request.path === '/auth/me',
+    ).length;
+    offline = true;
+    fireEvent.focus(window);
+    await waitFor(() =>
+      expect(
+        requests.filter((request) => request.path === '/auth/me').length,
+      ).toBe(previous + 1),
+    );
+    expect(screen.getByRole('button', { name: 'Crear usuario' })).toBeTruthy();
+    expect(getToken()).toBe('token-real-simulado');
+  });
+
   it('elimina acceso dummy y envía correo/password; muestra los errores del backend', async () => {
     mount('/login');
     const user = userEvent.setup();

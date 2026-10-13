@@ -42,6 +42,7 @@ CREATE TABLE roles (
     puede_subir_archivos TINYINT(1) NOT NULL DEFAULT 0,
     puede_editar_archivos TINYINT(1) NOT NULL DEFAULT 0,
     puede_eliminar_archivos TINYINT(1) NOT NULL DEFAULT 0,
+    puede_vaciar_papelera TINYINT(1) NOT NULL DEFAULT 0,
     puede_gestionar_carpetas TINYINT(1) NOT NULL DEFAULT 0,
     puede_gestionar_categorias TINYINT(1) NOT NULL DEFAULT 0,
     puede_gestionar_usuarios TINYINT(1) NOT NULL DEFAULT 0,
@@ -170,6 +171,7 @@ CREATE TABLE carpetas (
         CHARACTER SET utf8 COLLATE utf8_bin NOT NULL
         COMMENT 'FK lógica: usuarios.id_usuario',
 
+    en_purga TINYINT(1) NOT NULL DEFAULT 0,
     activo TINYINT(1) NOT NULL DEFAULT 1,
 
     fecha_eliminacion DATETIME(6) NULL,
@@ -261,6 +263,7 @@ CREATE TABLE archivos (
         CHARACTER SET utf8 COLLATE utf8_bin NOT NULL
         COMMENT 'FK lógica: archivos_versiones.id_version',
 
+    en_purga TINYINT(1) NOT NULL DEFAULT 0,
     activo TINYINT(1) NOT NULL DEFAULT 1,
 
     fecha_eliminacion DATETIME(6) NULL,

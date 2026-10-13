@@ -29,6 +29,7 @@ export const permissionLabels = {
   puede_subir_archivos: 'Subir archivos',
   puede_editar_archivos: 'Editar archivos',
   puede_eliminar_archivos: 'Eliminar archivos',
+  puede_vaciar_papelera: 'Vaciar papelera (eliminación definitiva)',
   puede_gestionar_carpetas: 'Gestionar carpetas',
   puede_gestionar_categorias: 'Gestionar categorías',
   puede_gestionar_usuarios: 'Gestionar usuarios',
