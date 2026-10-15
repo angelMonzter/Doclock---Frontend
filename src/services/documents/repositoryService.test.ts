@@ -62,7 +62,12 @@ beforeEach(() => {
               }))
             : [
                 { id_categoria: 'inactive', nombre: 'Inactiva', activo: 0 },
-                { id_categoria: 'last', nombre: 'Última', activo: 1 },
+                {
+                  id_categoria: 'last',
+                  nombre: 'Última',
+                  activo: 1,
+                  color: '#123456',
+                },
               ],
         );
       }
@@ -94,6 +99,8 @@ it('lee todas las categorías activas y usa la cuota real aunque el listado est�
   const data = await repositoryService.getSnapshot(permissions);
   expect(data.categories).toHaveLength(101);
   expect(data.categories.at(-1)?.id).toBe('last');
+  expect(data.categories.at(-1)?.color).toBe('#123456');
+  expect(data.categories[0].color).toBeNull();
   expect(data.storageBytes).toBe(900);
   expect(data.documents).toEqual([]);
   expect(data.policy).toEqual({

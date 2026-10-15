@@ -1,7 +1,13 @@
 // @vitest-environment jsdom
 //code mode control: contratos HTTP y formularios con transporte simulado, sin tocar la BD.
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/providers/AuthProvider';
@@ -148,7 +154,12 @@ it('crea y edita categorías, recupera datos del servidor y devuelve el foco', a
   await screen.findByText('Cambios guardados correctamente.');
   expect(
     requests.find((request) => request.method === 'POST')?.body,
-  ).toMatchObject({ nombre: 'Legal real', activo: 1, descripcion: null });
+  ).toMatchObject({
+    nombre: 'Legal real',
+    activo: 1,
+    descripcion: null,
+    color: null,
+  });
   await user.click(screen.getByRole('button', { name: 'Editar Legal real' }));
   await user.click(screen.getByLabelText('Activo'));
   await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
@@ -161,6 +172,43 @@ it('crea y edita categorías, recupera datos del servidor y devuelve el foco', a
       screen.getByRole('button', { name: 'Editar Legal real' }),
     ),
   );
+});
+
+it('previsualiza, guarda y elimina el color sin asignar valores de ejemplo', async () => {
+  const user = userEvent.setup();
+  const { container } = mount(<CategoriesPage />);
+  const create = await screen.findByRole('button', { name: 'Crear categoría' });
+  await waitFor(() => expect(create.hasAttribute('disabled')).toBe(false));
+  await user.click(create);
+  await user.type(screen.getByLabelText('Nombre *'), 'Categoría con color');
+  expect(container.querySelector('.category-label__color')).toBeNull();
+  fireEvent.change(screen.getByLabelText('Elegir color'), {
+    target: { value: '#123456' },
+  });
+  expect(
+    (container.querySelector('.category-label__color') as HTMLElement).style
+      .backgroundColor,
+  ).toBe('rgb(18, 52, 86)');
+  await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+  await screen.findByText('Cambios guardados correctamente.');
+  expect(
+    requests.find((request) => request.method === 'POST')?.body.color,
+  ).toBe('#123456');
+  expect(
+    (container.querySelector('.category-label__color') as HTMLElement).style
+      .backgroundColor,
+  ).toBe('rgb(18, 52, 86)');
+  await user.click(
+    screen.getByRole('button', { name: 'Editar Categoría con color' }),
+  );
+  await user.clear(screen.getByLabelText('Color (opcional)'));
+  expect(container.querySelector('.category-label__color')).toBeNull();
+  await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+  await screen.findByText('Cambios guardados correctamente.');
+  expect(
+    requests.find((request) => request.method === 'PATCH')?.body.color,
+  ).toBeNull();
+  expect(container.querySelector('.category-label__color')).toBeNull();
 });
 
 it('muestra error de API, conserva el formulario y permite reintentar', async () => {

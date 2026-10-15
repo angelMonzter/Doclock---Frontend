@@ -5,6 +5,7 @@ import { formatBytes, formatDate } from '@/lib/format';
 import type { DocumentFile } from '@/types/documents';
 import type { RepositorySnapshot } from '@/types/repository';
 import { DocumentActions } from './DocumentActions';
+import { CategoryLabel } from '@/components/categories/CategoryLabel';
 export function DocumentDetails({
   document,
   data,
@@ -15,6 +16,9 @@ export function DocumentDetails({
   onClose: () => void;
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
+  const category = data.categories.find(
+    (item) => item.id === document.categoryId,
+  );
   useEffect(() => {
     heading.current?.focus();
   }, [document.id]);
@@ -62,11 +66,7 @@ export function DocumentDetails({
         <div>
           <dt>Categoría</dt>
           <dd>
-            {
-              data.categories.find(
-                (category) => category.id === document.categoryId,
-              )?.name
-            }
+            <CategoryLabel name={category?.name} color={category?.color} />
           </dd>
         </div>
         <div>

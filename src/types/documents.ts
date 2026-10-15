@@ -1,5 +1,5 @@
 export type Folder = { id: string; name: string; parentId: string | null };
-export type Category = { id: string; name: string };
+export type Category = { id: string; name: string; color?: string | null };
 export type DocumentFile = {
   id: string;
   title: string;

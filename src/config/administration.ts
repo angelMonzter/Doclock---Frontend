@@ -47,7 +47,7 @@ export const adminModules: Record<ModuleId, ModuleDefinition> = {
     fields: [
       name,
       description,
-      { key: 'color', label: 'Color', type: 'color', defaultValue: '#194e3e' },
+      { key: 'color', label: 'Color', type: 'color' },
       active,
     ],
   },

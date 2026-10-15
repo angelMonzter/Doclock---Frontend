@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
 import type { AdminRecord } from '@/types/administration';
 import { CategoryForm } from '@/components/categories/CategoryForm';
+import { CategoryLabel } from '@/components/categories/CategoryLabel';
 import { useControlPage } from '@/hooks/administration/useControlPage';
 
 export function CategoriesPage() {
@@ -45,7 +46,12 @@ export function CategoriesPage() {
     {
       id: 'nombre',
       header: 'Nombre',
-      cell: (record) => display(record, 'nombre'),
+      cell: (record) => (
+        <CategoryLabel
+          name={display(record, 'nombre')}
+          color={String(record.values.color ?? '')}
+        />
+      ),
     },
     {
       id: 'descripcion',

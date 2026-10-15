@@ -1,5 +1,13 @@
 # Contratos, consumidores e impacto
 
+## Color de categorías
+
+- `CategoryLabel` pertenece al módulo `components/categories`. Props: `name?: string | null`, `color?: string | null`; sin color predeterminado. Solo muestra un indicador decorativo para valores hexadecimales de seis dígitos. El nombre permanece legible y, si falta, indica «Categoría no disponible». No consulta servicios ni añade interacción o foco.
+- Consumidores: `CategoriesPage`, vista previa de `CategoryForm`, `DocumentCollection` (Inicio y Documentos, lista/cuadrícula) y `DocumentDetails`. Estilos locales en `category-label.css`; etiqueta con fondo blanco, texto negro, borde del color elegido y pestaña izquierda de 9px. Sin color usa borde neutro y omite la pestaña. Los nombres largos pueden partirse.
+- `Category.color` es opcional y nullable; `repositoryService` conserva el valor real de la API y representa su ausencia con `null`. No se asignan colores de ejemplo ni se cambia el filtrado de categorías activas.
+- El formulario permite un hexadecimal opcional o el selector nativo. El negro inicial del selector es únicamente el valor técnico que exige `input[type=color]`; no se asigna al registro hasta una selección del usuario. El campo textual vacío se guarda como `null`. La vista previa usa el nombre escrito, nunca uno de ejemplo. Guardar mantiene la invalidación de consultas existente.
+- Estados de carga, error, permisos y disabled siguen a cargo de los componentes existentes. El indicador es decorativo (`aria-hidden`), no sustituye el nombre ni los estados de selección y no altera los colores de los iconos de archivo. Los transportes simulados de pruebas permanecen aislados del flujo real.
+
 ## Operaciones documentales S3
 
 Esta sección sustituye la descripción anterior de subida simulada. Comentarios `//code mode S3` identifican el cambio. El dummy permanece separado y se usa únicamente en sus pruebas.
@@ -39,30 +47,30 @@ Antes de cambiar un componente: localizar consumidores con rg, determinar su ám
 
 ## Componentes compartidos
 
-| Componente | Props / defaults | Responsabilidad y consumidores |
-| --- | --- | --- |
-| Button | Props nativas de button incluido ref. variant=primary (primary/secondary/ghost), size=default (default/small), asChild=false, type=button | LoginForm, DashboardPage, DocumentsPage, CreateFolderForm, UploadPage, UploadDropzone, RepositoryState. Slot compone un único hijo, por ejemplo Link; disabled no deshabilita semánticamente un enlace. |
-| TextField | Props nativas de input incluido ref; label obligatorio; error, hint, leadingIcon, trailingAction, id, className opcionales | LoginForm, búsqueda, CreateFolderForm y UploadQueue. Genera id, asocia mensajes mediante aria-describedby, error prevalece sobre hint. className afecta al input. |
-| Notice | tone=info (info/error/success), children | Auth y documentos: ayuda, errores y confirmaciones. error usa role=alert; demás role=status. |
-| Brand | inverse=false, className opcional | LoginPage y AppShell. Identidad desde config/brand, sin navegación propia. |
-| PageHeader | title, description, action opcional | DashboardPage, DocumentsPage y UploadPage. h1 y acción; enfoca título al montar/cambiarlo. |
-| EmptyState | title, description, action opcional | DocumentsPage: carpeta vacía y filtros sin coincidencias. Sin dominio. |
-| AppShell | userName, storageBytes opcional, onSignOut, children | ProtectedWorkspace. Sidebar, cabecera, menú móvil, bytes simulados y footer. Sin features/servicios. Menú en flujo; Escape cierra y restaura foco. Ajuste de despliegue: retirados imports de iconos sin uso; sin cambios de contrato, estados o presentación. |
+| Componente | Props / defaults                                                                                                                          | Responsabilidad y consumidores                                                                                                                                                                                                                                 |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Button     | Props nativas de button incluido ref. variant=primary (primary/secondary/ghost), size=default (default/small), asChild=false, type=button | LoginForm, DashboardPage, DocumentsPage, CreateFolderForm, UploadPage, UploadDropzone, RepositoryState. Slot compone un único hijo, por ejemplo Link; disabled no deshabilita semánticamente un enlace.                                                        |
+| TextField  | Props nativas de input incluido ref; label obligatorio; error, hint, leadingIcon, trailingAction, id, className opcionales                | LoginForm, búsqueda, CreateFolderForm y UploadQueue. Genera id, asocia mensajes mediante aria-describedby, error prevalece sobre hint. className afecta al input.                                                                                              |
+| Notice     | tone=info (info/error/success), children                                                                                                  | Auth y documentos: ayuda, errores y confirmaciones. error usa role=alert; demás role=status.                                                                                                                                                                   |
+| Brand      | inverse=false, className opcional                                                                                                         | LoginPage y AppShell. Identidad desde config/brand, sin navegación propia.                                                                                                                                                                                     |
+| PageHeader | title, description, action opcional                                                                                                       | DashboardPage, DocumentsPage y UploadPage. h1 y acción; enfoca título al montar/cambiarlo.                                                                                                                                                                     |
+| EmptyState | title, description, action opcional                                                                                                       | DocumentsPage: carpeta vacía y filtros sin coincidencias. Sin dominio.                                                                                                                                                                                         |
+| AppShell   | userName, storageBytes opcional, onSignOut, children                                                                                      | ProtectedWorkspace. Sidebar, cabecera, menú móvil, bytes simulados y footer. Sin features/servicios. Menú en flujo; Escape cierra y restaura foco. Ajuste de despliegue: retirados imports de iconos sin uso; sin cambios de contrato, estados o presentación. |
 
 Cambio compartido: Button y TextField usan ComponentProps nativas para declarar ref (React 19). Sin cambios a props previas o apariencia del login. workspace.css limita nuevos tamaños y layouts a .workspace o clases propias.
 
 ## Componentes de dominio
 
-| Componente | Props / defaults | Responsabilidad / consumidores |
-| --- | --- | --- |
-| LoginForm | Sin props | LoginPage; valida, llama useLogin y AuthProvider recibe usuario. |
-| RepositoryState | error opcional, retry | Las tres páginas internas. Carga y error recuperable de consulta. |
-| FileIcon | extension | Collection, Details y Queue; formato con icono y texto, sin vista previa real. |
-| DocumentCollection | documents, categories, onSelect(id); view=list; selectedId opcional | Dashboard y explorador comparten filas; lista/cuadrícula, selección simple. |
-| DocumentDetails | document, data, onClose | DocumentsPage; metadatos, foco en encabezado, Escape cierra. Página restaura foco. |
-| CreateFolderForm | parentId (string/null), onClose, onCreated(name) | DocumentsPage; servicio, invalidación de snapshot y resultado. |
-| UploadDropzone | disabled, onFiles(FileList) | UploadPage; diálogo/arrastre, sin validación o persistencia. |
-| UploadQueue | files, busy, progress, validationVisible, onRemove(id), onTitle(id,title) | UploadPage; títulos, validación y progreso, sin transporte. |
+| Componente         | Props / defaults                                                          | Responsabilidad / consumidores                                                     |
+| ------------------ | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| LoginForm          | Sin props                                                                 | LoginPage; valida, llama useLogin y AuthProvider recibe usuario.                   |
+| RepositoryState    | error opcional, retry                                                     | Las tres páginas internas. Carga y error recuperable de consulta.                  |
+| FileIcon           | extension                                                                 | Collection, Details y Queue; formato con icono y texto, sin vista previa real.     |
+| DocumentCollection | documents, categories, onSelect(id); view=list; selectedId opcional       | Dashboard y explorador comparten filas; lista/cuadrícula, selección simple.        |
+| DocumentDetails    | document, data, onClose                                                   | DocumentsPage; metadatos, foco en encabezado, Escape cierra. Página restaura foco. |
+| CreateFolderForm   | parentId (string/null), onClose, onCreated(name)                          | DocumentsPage; servicio, invalidación de snapshot y resultado.                     |
+| UploadDropzone     | disabled, onFiles(FileList)                                               | UploadPage; diálogo/arrastre, sin validación o persistencia.                       |
+| UploadQueue        | files, busy, progress, validationVisible, onRemove(id), onTitle(id,title) | UploadPage; títulos, validación y progreso, sin transporte.                        |
 
 ## Estado y servicios
 
@@ -96,7 +104,6 @@ La reorganización conserva las props, valores predeterminados, estados y respon
 4. Tokens: login y rutas a 320, 768, 1024 y 1440 px. Estilos internos en workspace.css.
 5. Subida: formatos/tamaños/cola, títulos/categoría, cancelación/fallo/reintento y ausencia de duplicados.
 
-
 ## Administración (extensión basada en db.sql)
 
 Páginas: CategoriesPage, UsersPage, RolesPage, HistoryPage, AppearancePage, FileSettingsPage, FileTypesPage y MessagesPage, todas directamente en src/pages. DashboardPage, DocumentsPage y UploadPage fueron movidas sin cambiar su contenido. Solo auth conserva subcarpeta.
@@ -116,14 +123,14 @@ Límites intencionales: los catálogos administrativos son una simulación separ
 
 Los contratos de props se exportan desde el archivo del componente; los contratos de datos permanecen en types. Indentación de dos espacios, props y bloques JSX en varias líneas. No existen componentes globales que seleccionen una pantalla mediante una prop de módulo.
 
-| Componente | Contrato y valores predeterminados | Responsabilidad y consumidores |
-| --- | --- | --- |
-| SelectField | SelectFieldProps extiende props nativas de select, incluido ref; label obligatorio; containerClassName, hint, error opcionales; id autogenerado si se omite; children contiene las opciones | Filtros de cinco catálogos, DocumentsPage, HistoryPage, UploadPage, UserForm, AppearanceForm y MessageForm. Etiqueta y mensajes asociados; error prevalece sobre hint; combina aria-describedby. className aplica al select. |
-| TextareaField | TextareaFieldProps extiende props nativas de textarea, incluido ref; label obligatorio; containerClassName, hint y error opcionales; id autogenerado | Descripciones en CategoryForm, RoleForm, FileTypeForm y UploadPage; contenido de MessageForm. className aplica al textarea. Conserva límites, filas, readonly y disabled nativos. |
-| CheckboxField | CheckboxFieldProps extiende props nativas de input salvo type, fijo en checkbox; label obligatorio; containerClassName opcional; id autogenerado | Booleanos de los formularios administrativos y simulación de fallo en UploadPage. checked/onChange o defaultChecked nativos; sin reglas de dominio. |
-| DataTable<T> | caption, rows, columns, getRowId obligatorios; emptyState=null. DataTableColumn<T>: id, header, cell(row) | UsersPage, RolesPage, CategoriesPage, FileTypesPage, MessagesPage. Tabla semántica con encabezados, caption y región enfocables para desplazamiento horizontal. Cada página define columnas, acciones y estado vacío. Carga/error y filtrado pertenecen a la página/hook. |
-| AdministrationFormFrame | title, legend, busy, children, onSubmit, onClose obligatorios; error, note y preview opcionales | Marco de siete formularios de administración. Enfoca encabezado al montar y error después de guardar; fieldset y acciones disabled durante guardado; Escape cancela si no está ocupado. No consulta servicios ni decide campos o módulos. |
-| Formularios de dominio | Cada archivo exporta su tipo FormProps: record opcional, onClose y onSaved; UserForm añade roles. Sin record significa alta | Cada página monta su formulario específico. Campos explícitos construidos con controles ui; permisos en RoleForm, vista previa en AppearanceForm/MessageForm y opciones de rol en UserForm. Se desmontan al cerrar para reiniciar valores en la siguiente edición. |
+| Componente              | Contrato y valores predeterminados                                                                                                                                                          | Responsabilidad y consumidores                                                                                                                                                                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SelectField             | SelectFieldProps extiende props nativas de select, incluido ref; label obligatorio; containerClassName, hint, error opcionales; id autogenerado si se omite; children contiene las opciones | Filtros de cinco catálogos, DocumentsPage, HistoryPage, UploadPage, UserForm, AppearanceForm y MessageForm. Etiqueta y mensajes asociados; error prevalece sobre hint; combina aria-describedby. className aplica al select.                                              |
+| TextareaField           | TextareaFieldProps extiende props nativas de textarea, incluido ref; label obligatorio; containerClassName, hint y error opcionales; id autogenerado                                        | Descripciones en CategoryForm, RoleForm, FileTypeForm y UploadPage; contenido de MessageForm. className aplica al textarea. Conserva límites, filas, readonly y disabled nativos.                                                                                         |
+| CheckboxField           | CheckboxFieldProps extiende props nativas de input salvo type, fijo en checkbox; label obligatorio; containerClassName opcional; id autogenerado                                            | Booleanos de los formularios administrativos y simulación de fallo en UploadPage. checked/onChange o defaultChecked nativos; sin reglas de dominio.                                                                                                                       |
+| DataTable<T>            | caption, rows, columns, getRowId obligatorios; emptyState=null. DataTableColumn<T>: id, header, cell(row)                                                                                   | UsersPage, RolesPage, CategoriesPage, FileTypesPage, MessagesPage. Tabla semántica con encabezados, caption y región enfocables para desplazamiento horizontal. Cada página define columnas, acciones y estado vacío. Carga/error y filtrado pertenecen a la página/hook. |
+| AdministrationFormFrame | title, legend, busy, children, onSubmit, onClose obligatorios; error, note y preview opcionales                                                                                             | Marco de siete formularios de administración. Enfoca encabezado al montar y error después de guardar; fieldset y acciones disabled durante guardado; Escape cancela si no está ocupado. No consulta servicios ni decide campos o módulos.                                 |
+| Formularios de dominio  | Cada archivo exporta su tipo FormProps: record opcional, onClose y onSaved; UserForm añade roles. Sin record significa alta                                                                 | Cada página monta su formulario específico. Campos explícitos construidos con controles ui; permisos en RoleForm, vista previa en AppearanceForm/MessageForm y opciones de rol en UserForm. Se desmontan al cerrar para reiniciar valores en la siguiente edición.        |
 
 - useAdministrationPage(module): consulta, búsqueda/estado, registros filtrados, edición, confirmación y retorno de foco al disparador (o título si el registro deja de aparecer). No devuelve JSX.
 - useAdministrationForm(module, record, onSaved): valores iniciales, setValue y mutación de guardado. Usa el adaptador mock existente e invalida la consulta antes de notificar éxito; conserva errores del servicio. No conoce componentes visuales.
@@ -190,7 +197,6 @@ Esta sección reemplaza las referencias anteriores a datos simulados para Catego
 - AppShell oculta los accesos a Apariencia y Configuración de archivos. Las rutas y permisos del backend se mantienen.
 - RoleForm omite la casilla Gestionar configuración; useControlForm conserva el valor cargado del rol y lo envía sin alterarlo. Los roles nuevos conservan el valor predeterminado false. No se modifica la definición del permiso ni datos existentes.
 
-
 ## Interfaz según permisos de rol
 
 - `workspaceAccess` centraliza el acceso de navegación: Inicio para toda sesión; Documentos con lectura o gestión de carpetas; Subir con permiso de carga; Categorías con lectura, carga, edición o gestión de categorías; Usuarios/Roles con gestión de usuarios; Historial con lectura de historial. Apariencia y Configuración de archivos permanecen ocultas.
@@ -200,7 +206,6 @@ Esta sección reemplaza las referencias anteriores a datos simulados para Catego
 - CategoriesPage conserva consulta y filtros con edición deshabilitada para lectores. CreateFolderForm bloquea el guardado al perder permiso; Cancelar sigue disponible. No cambian contratos ni estilos de components/ui.
 - AuthProvider vuelve a consultar `/auth/me` al recuperar foco o visibilidad, sin desmontar formularios durante la consulta. Un fallo transitorio conserva la sesión; el tratamiento existente de HTTP 401 sigue cerrándola. El backend continúa validando cada operación.
 - Pruebas con HTTP simulado: menú por combinaciones de permisos, lector sin mutaciones, actualización de sesión y fallo de red, además de compilación y revisión adaptable/teclado. No se modifican backend, MySQL ni S3.
-
 
 ## Vaciar papelera e historial legible
 

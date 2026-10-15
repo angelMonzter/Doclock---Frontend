@@ -1,5 +1,6 @@
 import { ArrowUpRight } from 'lucide-react';
 import { FileIcon } from '@/components/documents/FileIcon';
+import { CategoryLabel } from '@/components/categories/CategoryLabel';
 import { formatBytes, formatDate } from '@/lib/format';
 import type { Category, DocumentFile } from '@/types/documents';
 export function DocumentCollection({
@@ -33,10 +34,11 @@ export function DocumentCollection({
             <span className="document-name">
               <strong title={doc.title}>{doc.title}</strong>
               <span>
-                {
-                  categories.find((category) => category.id === doc.categoryId)
-                    ?.name
-                }{' '}
+                <CategoryLabel
+                  {...categories.find(
+                    (category) => category.id === doc.categoryId,
+                  )}
+                />{' '}
                 · {doc.extension.toUpperCase()} · {formatBytes(doc.bytes)}
               </span>
             </span>

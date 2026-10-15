@@ -2,7 +2,12 @@ import { apiRequest } from '@/services/api';
 import { readAllPages } from '@/services/pagination';
 import type { RepositoryService, RepositorySnapshot } from '@/types/repository';
 
-type CategoryRow = { id_categoria: string; nombre: string; activo: number };
+type CategoryRow = {
+  id_categoria: string;
+  nombre: string;
+  activo: number;
+  color?: string | null;
+};
 type FolderRow = {
   id_carpeta: string;
   nombre: string;
@@ -114,6 +119,7 @@ export const repositoryService: RepositoryService = {
         .map((row) => ({
           id: row.id_categoria,
           name: row.nombre,
+          color: row.color ?? null,
         })),
       documents,
       activity: documents.slice(0, 5).map((doc) => ({

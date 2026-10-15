@@ -1,0 +1,34 @@
+.category-label {
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.35rem 0.75rem 0.35rem 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #ffffff;
+  color: #000000;
+  overflow: hidden;
+  vertical-align: baseline;
+}
+
+.category-label__color {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 9px;
+}
+
+.category-label__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.category-color-field {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.category-preview {
+  margin-block: 1rem;
+}
