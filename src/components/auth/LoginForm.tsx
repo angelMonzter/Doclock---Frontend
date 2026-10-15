@@ -23,11 +23,14 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
+  const [email, password] = watch(['email', 'password']);
+  const hasCredentials = email.trim().length > 0 && password.length > 0;
 
   return (
     <>
@@ -92,7 +95,11 @@ export function LoginForm() {
           </Notice>
         )}
         {login.isError && <Notice tone="error">{login.error.message}</Notice>}
-        <Button type="submit" className="w-full" disabled={login.isPending}>
+        <Button
+          type="submit"
+          className="w-full login-submit"
+          disabled={!hasCredentials || login.isPending}
+        >
           {login.isPending ? (
             <>
               <LoaderCircle className="loading-icon" size={19} /> Verificando

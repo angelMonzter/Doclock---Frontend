@@ -1,5 +1,7 @@
 # Contratos, consumidores e impacto
 
+- `LoginForm`: el botón de acceso permanece desactivado mientras falte correo o contraseña, y durante la petición. Su cursor desactivado es normal; conserva la validación y el indicador interno de envío existentes. El estilo se limita a `.login-submit` y no modifica `Button` compartido.
+
 ## Color de categorías
 
 - `CategoryLabel` pertenece al módulo `components/categories`. Props: `name?: string | null`, `color?: string | null`; sin color predeterminado. Solo muestra un indicador decorativo para valores hexadecimales de seis dígitos. El nombre permanece legible y, si falta, indica «Categoría no disponible». No consulta servicios ni añade interacción o foco.
